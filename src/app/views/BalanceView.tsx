@@ -1,6 +1,7 @@
 import { useId } from "react";
 import { formatYen } from "../../lib/format.ts";
 import type { FinanceYear } from "../../lib/types.ts";
+import { responsiveSvgProps } from "../chart/responsiveSvg.ts";
 import { useSize } from "../hooks/useSize.ts";
 import { YearSlider } from "../sankey/YearSlider.tsx";
 import { COLOR_DEDUCT, COLOR_EXPENSE, COLOR_INCOME, COLOR_TOTAL } from "../sankey/colors.ts";
@@ -56,7 +57,7 @@ export function BalanceView({ row, years, onYear }: BalanceViewProps) {
 
 function BalanceFigure({ row, patternId }: { row: FinanceYear; patternId: string }) {
   const [ref, size] = useSize<HTMLDivElement>();
-  const width = Math.max(size.width, 640);
+  const width = 720;
   const height = 460;
   const assets = row.assets.fixed + row.assets.current;
   const liab = row.liabilities.fixed + row.liabilities.current;
@@ -104,7 +105,11 @@ function BalanceFigure({ row, patternId }: { row: FinanceYear; patternId: string
 
   return (
     <div className="chart-wrap" ref={ref}>
-      <svg width={width} height={height} role="img" aria-label={`${row.year}年度の貸借対照表`}>
+      <svg
+        {...responsiveSvgProps(width, height, size.width)}
+        role="img"
+        aria-label={`${row.year}年度の貸借対照表`}
+      >
         <defs>
           <pattern id={patternId} width="7" height="7" patternUnits="userSpaceOnUse">
             <path d="M0 7 L7 0" stroke={COLOR_DEDUCT} strokeWidth="1.4" />

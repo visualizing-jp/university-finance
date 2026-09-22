@@ -4,6 +4,7 @@ import { sankey as d3Sankey, sankeyLinkHorizontal } from "d3-sankey";
 import "d3-transition";
 import type { SankeyLink, SankeyNode } from "d3-sankey";
 import { formatShare, formatYen } from "../../lib/format.ts";
+import { responsiveSvgProps } from "../chart/responsiveSvg.ts";
 import { useSize } from "../hooks/useSize.ts";
 import { buildIncomeGraph, type GraphLink, type GraphNode } from "./buildIncome.ts";
 import { LINK_STROKE_OPACITY, linkStroke, nodeFill } from "./colors.ts";
@@ -16,6 +17,8 @@ interface SankeyChartProps {
 type SNode = SankeyNode<GraphNode, GraphLink>;
 type SLink = SankeyLink<GraphNode, GraphLink>;
 
+const FRAME_W = 960;
+const FRAME_H = 560;
 const EASE_OUT = (t: number) => 1 - (1 - t) ** 4;
 
 function endpointId(end: SLink["source"] | SLink["target"]): string {
@@ -81,7 +84,7 @@ export function SankeyChart({ row }: SankeyChartProps) {
 
   useEffect(() => {
     const svg = svgRef.current;
-    if (!svg || size.width < 40 || size.height < 40) return;
+    if (!svg) return;
 
     const yearChanged = yearRef.current !== row.year;
     const duration = !firstDraw.current && yearChanged && !prefersReducedMotion() ? 600 : 0;
@@ -89,21 +92,16 @@ export function SankeyChart({ row }: SankeyChartProps) {
     yearRef.current = row.year;
     setHover(null);
 
-    const layoutWidth = Math.max(size.width, 880);
-    const margin = {
-      top: 16,
-      right: layoutWidth < 1000 ? 132 : 148,
-      bottom: 16,
-      left: layoutWidth < 1000 ? 132 : 156,
-    };
+    const layoutWidth = FRAME_W;
+    const margin = { top: 16, right: 148, bottom: 16, left: 156 };
     const layout = d3Sankey<GraphNode, GraphLink>()
       .nodeId((d) => d.id)
       .nodeWidth(18)
-      .nodePadding(size.height < 560 ? 8 : 14)
+      .nodePadding(14)
       .nodeSort((a, b) => a.order - b.order)
       .extent([
         [margin.left, margin.top],
-        [layoutWidth - margin.right, size.height - margin.bottom],
+        [layoutWidth - margin.right, FRAME_H - margin.bottom],
       ]);
 
     const laid = layout({
@@ -179,7 +177,7 @@ export function SankeyChart({ row }: SankeyChartProps) {
     labelEnter.append("text").attr("class", "label-name");
     labelEnter.append("text").attr("class", "label-meta");
 
-    const anchors = labelAnchors(nodes, size.height);
+    const anchors = labelAnchors(nodes, FRAME_H);
     const labelPos = (d: SNode) => {
       const y = anchors.get(d.id) ?? ((d.y0 ?? 0) + (d.y1 ?? 0)) / 2;
       if (d.side === "center") {
@@ -263,14 +261,13 @@ export function SankeyChart({ row }: SankeyChartProps) {
         nodeMerge.style("opacity", 1);
         setHover(null);
       });
-  }, [graph, row.year, size.height, size.width]);
+  }, [graph, row.year]);
 
   return (
     <div className="sankey-wrap" ref={wrapRef}>
       <svg
         ref={svgRef}
-        width={Math.max(size.width, 880)}
-        height={size.height}
+        {...responsiveSvgProps(FRAME_W, FRAME_H, size.width)}
         role="img"
         aria-label={`${row.year}年度の事業活動収支`}
       >

@@ -4,6 +4,7 @@ import { scaleLinear, scalePoint } from "d3-scale";
 import { formatYen } from "../../lib/format.ts";
 import { OPERATING_ASSET_NOTE, TREND_GROUPS, type TrendGroup } from "../../lib/taxonomy.ts";
 import type { FinanceYear } from "../../lib/types.ts";
+import { responsiveSvgProps } from "../chart/responsiveSvg.ts";
 import { useSize } from "../hooks/useSize.ts";
 
 interface TrendViewProps {
@@ -26,7 +27,8 @@ export function TrendView({ rows }: TrendViewProps) {
 function TrendChart({ group, rows }: { group: TrendGroup; rows: FinanceYear[] }) {
   const [ref, size] = useSize<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
-  const width = Math.max(size.width, 280);
+  const ready = size.width >= 8;
+  const width = ready ? size.width : 640;
   const height = 240;
   const pad = { top: 12, right: 8, bottom: 28, left: 72 };
   const years = rows.map((row) => row.year);
@@ -76,8 +78,7 @@ function TrendChart({ group, rows }: { group: TrendGroup; rows: FinanceYear[] })
       </ul>
       <div className="chart-wrap chart-wrap--line" ref={ref}>
         <svg
-          width={width}
-          height={height}
+          {...responsiveSvgProps(width, height, size.width)}
           role="img"
           aria-label={`${group.title}の経年変化`}
           onPointerMove={(event) => setHover(yearAt(event.clientX))}
