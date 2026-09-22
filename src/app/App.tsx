@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { formatEraYear } from "../lib/era.ts";
 import { formatYen } from "../lib/format.ts";
 import { metricById } from "../lib/metrics.ts";
+import { trackPage } from "../lib/analytics.ts";
 import {
   DEFAULT_YEAR,
   formatComparePermalink,
@@ -119,11 +120,13 @@ export function App() {
     if (mode === "compare") {
       applyComparePermalink(year, metric.id);
       document.title = `大学を比べる ${year}年度の${metric.name}`;
+      trackPage();
       return;
     }
     if (data == null) return;
     applyPermalink(data.id, year, view);
     document.title = pageTitle(data.name, year, view);
+    trackPage();
   }, [mode, year, view, data, metric]);
 
   if (mode === "view" && error && data == null) {
