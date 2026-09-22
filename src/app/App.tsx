@@ -1,37 +1,36 @@
 import { useEffect, useRef, useState } from "react";
 import { formatEraYear } from "../lib/era.ts";
 import { formatYen } from "../lib/format.ts";
+import { metricById } from "../lib/metrics.ts";
 import {
   DEFAULT_YEAR,
   formatComparePermalink,
   formatPermalink,
   parsePermalink,
   snapYear,
-  type ModeId,
+  type AppMode,
   type ViewId,
 } from "../lib/permalink.ts";
-import type { MetricId } from "../lib/metrics.ts";
 import {
   UNIVERSITIES,
   universityById,
   type FinanceYear,
   type UniversityFinance,
 } from "../lib/types.ts";
-import { ModeNav } from "./ModeNav.tsx";
 import { ViewNav } from "./ViewNav.tsx";
-import { CompareView } from "./views/CompareView.tsx";
 import { BalanceView } from "./views/BalanceView.tsx";
 import { CashView } from "./views/CashView.tsx";
+import { CompareView } from "./views/CompareView.tsx";
 import { IncomeView } from "./views/IncomeView.tsx";
 import { TrendView } from "./views/TrendView.tsx";
 
-function applyLookPermalink(id: string, year: number, view: ViewId): void {
+function applyPermalink(id: string, year: number, view: ViewId): void {
   const next = formatPermalink(id, year, view);
   if (window.location.search === next) return;
   window.history.replaceState({ id, year, view }, "", `${window.location.pathname}${next}`);
 }
 
-function applyComparePermalink(year: number, metric: MetricId): void {
+function applyComparePermalink(year: number, metric: string): void {
   const next = formatComparePermalink(year, metric);
   if (window.location.search === next) return;
   window.history.replaceState({ mode: "compare", year, metric }, "", `${window.location.pathname}${next}`);
@@ -52,25 +51,26 @@ function unionYears(schools: UniversityFinance[]): number[] {
 
 export function App() {
   const boot = parsePermalink(window.location.search);
-  const [mode, setMode] = useState<ModeId>(boot.mode);
-  const [metric, setMetric] = useState<MetricId>(boot.metric);
-  const [lookId, setLookId] = useState(boot.id ?? UNIVERSITIES[0].id);
-  const school = universityById(lookId);
+  const school = boot.id == null ? UNIVERSITIES[0] : universityById(boot.id);
+  const [mode, setMode] = useState<AppMode>(boot.mode);
   const [data, setData] = useState<UniversityFinance | null>(null);
-  const [catalog, setCatalog] = useState<UniversityFinance[] | null>(null);
+  const [compared, setCompared] = useState<UniversityFinance[] | null>(null);
   const [error, setError] = useState<string | null>(
-    mode === "look" && school == null ? `「${lookId}」はまだありません。` : null,
+    boot.mode === "view" && school == null ? `「${boot.id}」はまだありません。` : null,
   );
   const [year, setYear] = useState<number | null>(boot.year);
   const [view, setView] = useState<ViewId>(boot.view);
+  const [metricId, setMetricId] = useState(boot.metric);
   const yearRef = useRef<number | null>(boot.year);
+  const viewYear = useRef<number | null>(boot.year);
+  const metric = metricById(metricId);
 
   useEffect(() => {
     if (year != null) yearRef.current = year;
   }, [year]);
 
   useEffect(() => {
-    if (mode !== "look" || school == null) return;
+    if (mode !== "view" || school == null) return;
     let cancelled = false;
     fetch(`${import.meta.env.BASE_URL}data/${school.file}`)
       .then((res) => {
@@ -88,7 +88,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [school, mode]);
+  }, [mode, school]);
 
   useEffect(() => {
     if (mode !== "compare") return;
@@ -101,10 +101,10 @@ export function App() {
         }),
       ),
     )
-      .then((rows) => {
+      .then((schools) => {
         if (cancelled) return;
-        setCatalog(rows);
-        setYear(snapYear(unionYears(rows), yearRef.current ?? DEFAULT_YEAR));
+        setCompared(schools);
+        setYear(snapYear(unionYears(schools), yearRef.current ?? DEFAULT_YEAR));
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "読み込みに失敗しました");
@@ -115,18 +115,18 @@ export function App() {
   }, [mode]);
 
   useEffect(() => {
+    if (year == null) return;
     if (mode === "compare") {
-      const nextYear = year ?? DEFAULT_YEAR;
-      applyComparePermalink(nextYear, metric);
-      document.title = `大学を比べる ${nextYear}年度`;
+      applyComparePermalink(year, metric.id);
+      document.title = `大学を比べる ${year}年度の${metric.name}`;
       return;
     }
-    if (year == null || data == null) return;
-    applyLookPermalink(data.id, year, view);
+    if (data == null) return;
+    applyPermalink(data.id, year, view);
     document.title = pageTitle(data.name, year, view);
   }, [mode, year, view, data, metric]);
 
-  if (error && data == null && catalog == null) {
+  if (mode === "view" && error && data == null) {
     return (
       <main className="page">
         <p className="status">{error}</p>
@@ -134,30 +134,46 @@ export function App() {
     );
   }
 
-  const years =
-    mode === "compare"
-      ? (catalog != null ? unionYears(catalog) : [])
-      : (data?.years.map((row) => row.year) ?? []);
+  const compareYears = compared == null ? [] : unionYears(compared);
+  const years = mode === "compare" ? compareYears : (data?.years.map((row) => row.year) ?? []);
   const row: FinanceYear | null = data?.years.find((item) => item.year === year) ?? null;
   const first = years[0];
   const last = years[years.length - 1];
+  const compareReady = mode === "compare" && compared != null && year != null;
 
   return (
     <div className="page">
       <header className="masthead">
         <p className="eyebrow">学校法人の計算書類</p>
-        {mode === "look" ? (
+        <nav className="mode-nav" aria-label="画面">
+          <button
+            type="button"
+            aria-current={mode === "compare" ? "page" : undefined}
+            onClick={() => {
+              viewYear.current = year ?? viewYear.current;
+              setMode("compare");
+            }}
+          >
+            比べる
+          </button>
+          <button
+            type="button"
+            aria-current={mode === "view" ? "page" : undefined}
+            onClick={() => {
+              if (viewYear.current != null) setYear(viewYear.current);
+              setMode("view");
+            }}
+          >
+            見る
+          </button>
+        </nav>
+        {mode === "view" ? (
           <nav className="school-nav" aria-label="学校">
             {UNIVERSITIES.map((item) => (
               <a
                 key={item.id}
                 href={formatPermalink(item.id, year ?? boot.year ?? DEFAULT_YEAR, view)}
                 aria-current={data?.id === item.id ? "page" : undefined}
-                onClick={(event) => {
-                  event.preventDefault();
-                  setLookId(item.id);
-                  setMode("look");
-                }}
               >
                 {item.name}
               </a>
@@ -167,31 +183,40 @@ export function App() {
         <div className="masthead__row">
           <h1>
             {mode === "compare" ? "大学を比べる" : (data?.name ?? school?.name ?? "学校法人")}
-            {mode === "look" ? <span className="sep">の経営状況</span> : null}
+            {mode === "view" ? <span className="sep">の経営状況</span> : null}
           </h1>
-          <ModeNav mode={mode} onMode={setMode} />
+          {mode === "view" ? <ViewNav view={view} onView={setView} /> : null}
         </div>
-        {mode === "look" ? <ViewNav view={view} onView={setView} /> : null}
       </header>
       <p className="lede">
         {mode === "compare"
-          ? compareLede(year, first, last)
+          ? year == null
+            ? "1つの比率で、計算書類がある大学を並べる。"
+            : `${year}年度。1つの比率で並べる。横棒はその年度、折れ線は${first ?? 2015}年度以降。`
           : lede(view, row, first, last)}
       </p>
-      {error ? <p className="status">{error}</p> : null}
+      {error && mode === "compare" ? <p className="status">{error}</p> : null}
       {mode === "compare" ? (
-        catalog != null && year != null ? (
+        compareReady && compared != null ? (
           <>
             <CompareView
-              schools={catalog}
+              schools={compared}
+              years={compareYears}
               year={year}
-              years={years}
               metric={metric}
               onYear={setYear}
-              onMetric={setMetric}
+              onMetric={setMetricId}
             />
             <footer className="source">
-              比率の分母は事業活動収入（経常収入は未抽出）。学生数がないため1人あたりは出していない。日本大学は法人全体。出典は各学校の計算書類。円を百万円に四捨五入して表示。2014年度以前の消費収支計算書は含まない。
+              出典:{" "}
+              {compared.map((item, index) => (
+                <span key={item.id}>
+                  {index > 0 ? "、" : null}
+                  {item.corporation}「{item.source.replace(`${item.corporation} `, "")}」（
+                  <a href={item.sourceUrl}>{item.sourceUrl}</a>）
+                </span>
+              ))}
+              。比率はパーセント（小数1桁）、運用資産余裕比率は年。2014年度以前の消費収支計算書は含まない。
             </footer>
           </>
         ) : error ? null : (
@@ -214,12 +239,6 @@ export function App() {
       )}
     </div>
   );
-}
-
-function compareLede(year: number | null, first: number | undefined, last: number | undefined): string {
-  const span = first != null && last != null ? `${first}–${last}年度。` : "";
-  const when = year != null ? `${year}年度（${formatEraYear(year)}）。` : "";
-  return `${when}${span}大学によって、経営や教育への投資はどう違うか。`;
 }
 
 function lede(

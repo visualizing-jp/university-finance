@@ -21,6 +21,32 @@ export interface FinanceYear {
   activityIncome: number;
   activityExpense: number;
   balanceBeforeReserve: number;
+  /** 教育活動収入計 */
+  educationIncome: number;
+  /** 教育活動外収入計 */
+  nonEducationIncome: number;
+  /** 教育活動支出計 */
+  educationExpense: number;
+  /** 教育活動外支出計 */
+  nonEducationExpense: number;
+  /** 教育活動収入計 + 教育活動外収入計 */
+  ordinaryIncome: number;
+  /** 教育活動支出計 + 教育活動外支出計 */
+  ordinaryExpense: number;
+  /** 計算書類の経常収支差額。経常収入 − 経常支出と一致する。 */
+  ordinaryBalance: number;
+  /** 経常費等補助金。施設設備補助金は含まない。 */
+  ordinarySubsidy: number;
+  /** 教育活動の寄付金。施設設備寄付金と特別収入の現物寄付は含まない。 */
+  ordinaryDonation: number;
+  /** 借入金 + 学校債 + 未払金 + 手形債務 */
+  externalLiabilities: number;
+  externalLiabilityParts: {
+    loans: number;
+    bonds: number;
+    unpaid: number;
+    notes: number;
+  };
   assets: { fixed: number; current: number };
   liabilities: { fixed: number; current: number };
   netAssets: { basicFund: number; carried: number };
@@ -48,10 +74,11 @@ export interface UniversityFinance {
 }
 
 export const UNIVERSITIES = [
-  { id: "tamabi", file: "tamabi.json", name: "多摩美術大学", color: "#c51b7d" },
-  { id: "zokei", file: "zokei.json", name: "東京造形大学", color: "#4d9221" },
-  { id: "joshibi", file: "joshibi.json", name: "女子美術大学", color: "#8e0152" },
-  { id: "nichidai", file: "nichidai.json", name: "日本大学", color: "#2c3338" },
+  { id: "tamabi", file: "tamabi.json", name: "多摩美術大学" },
+  { id: "musabi", file: "musabi.json", name: "武蔵野美術大学" },
+  { id: "zokei", file: "zokei.json", name: "東京造形大学" },
+  { id: "joshibi", file: "joshibi.json", name: "女子美術大学" },
+  { id: "nichidai", file: "nichidai.json", name: "日本大学" },
 ] as const;
 
 export type UniversityId = (typeof UNIVERSITIES)[number]["id"];

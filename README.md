@@ -6,8 +6,9 @@
 - 資産・負債: 貸借対照表の左右
 - 資金の流れ: 活動区分資金収支のウォーターフォール
 - 経年変化: 収入・支出・ストック・収支差額の折れ線
+- 比べる: 経常収入などを分母にした比率を、1指標ずつ横棒と折れ線で並べる
 
-いま JSON があるのは多摩美術大学、東京造形大学、女子美術大学、日本大学（法人全体）。出典は [`docs/sources.md`](docs/sources.md)。
+いま JSON があるのは多摩美術大学、武蔵野美術大学、東京造形大学、女子美術大学、日本大学（法人全体）。出典は [`docs/sources.md`](docs/sources.md)。
 
 ## 開発
 
@@ -22,6 +23,7 @@ npm run dev
 ```
 /?mode=compare&year=2025
 /?id=tamabi&year=2024
+/?id=musabi&year=2025
 /?id=zokei&year=2025
 /?id=joshibi&year=2025
 /?id=nichidai&year=2025
@@ -29,4 +31,4 @@ npm run dev
 
 比較の既定指標 `educationRatio` と、個別大学の既定 `view=income` は URL から省く。
 
-数値の正本は公式の会計報告PDF。科目の畳み方は [`docs/accounts.md`](docs/accounts.md)。PDF は `data/raw/<id>/fyYYYY.pdf`。抽出は `python3 scripts/extract_tamabi.py <pdf dir> <output json> <id>`。
+数値の正本は公式の会計報告PDF。科目の畳み方は [`docs/accounts.md`](docs/accounts.md)。PDF は `data/raw/<id>/fyYYYY.pdf`。抽出は `python3 scripts/extract_tamabi.py <pdf dir> <output json> <id>`。多摩美術大学の令和6年度はフォントが抜けるため、同じディレクトリの `fy2024.txt` を読む。

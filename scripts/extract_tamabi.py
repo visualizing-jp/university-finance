@@ -33,6 +33,9 @@ ACTIVITY_NAMES = {
     "過年度修正額",
     "特別寄付金",
     "一般寄付金",
+    "国庫補助金",
+    "地方公共団体補助金",
+    "経常収支差額",
     "人件費",
     "教育研究経費",
     "管理経費",
@@ -65,7 +68,27 @@ BS_NAMES = {
     "資産の部合計",
     "負債の部合計",
     "純資産の部合計",
+    "長期借入金",
+    "短期借入金",
+    "1年以内返済予定長期借入金",
+    "一年以内返済予定長期借入金",
+    "返済期限が1年以内の長期借入金",
+    "学校債",
+    "1年以内償還予定学校債",
+    "一年以内償還予定学校債",
+    "未払金",
+    "支払手形",
+    "手形債務",
 }
+LOAN_NAMES = (
+    "長期借入金",
+    "短期借入金",
+    "1年以内返済予定長期借入金",
+    "一年以内返済予定長期借入金",
+    "返済期限が1年以内の長期借入金",
+)
+BOND_NAMES = ("学校債", "1年以内償還予定学校債", "一年以内償還予定学校債")
+NOTE_NAMES = ("支払手形", "手形債務")
 CASH_NAMES = {
     "教育活動資金収支差額",
     "施設整備等活動資金収支差額",
@@ -295,6 +318,34 @@ def optional(rows: list[tuple[str, int, bool]], name: str, year: int) -> int:
     return choose(rows, name, year)[0][1]
 
 
+def regular_subsidy(rows: list[tuple[str, int, bool]], year: int) -> int:
+    if hits_of(rows, "経常費等補助金"):
+        return only(rows, "経常費等補助金", year)
+    total = optional(rows, "国庫補助金", year) + optional(rows, "地方公共団体補助金", year)
+    if total == 0:
+        raise SystemExit(f"{year}: 経常費等補助金 が 0 件")
+    return total
+
+
+def sum_optional(rows: list[tuple[str, int, bool]], names: tuple[str, ...], year: int) -> int:
+    return sum(optional(rows, name, year) for name in names)
+
+
+def external_liabilities(rows: list[tuple[str, int, bool]], year: int) -> dict[str, int]:
+    """借入金・学校債・未払金・手形債務。長期未払金はリースなので含めない。"""
+    parts = {
+        "loans": sum_optional(rows, LOAN_NAMES, year),
+        "bonds": sum_optional(rows, BOND_NAMES, year),
+        "unpaid": optional(rows, "未払金", year),
+        "notes": sum_optional(rows, NOTE_NAMES, year),
+    }
+    total = sum(parts.values())
+    liabilities = only(rows, "固定負債", year) + only(rows, "流動負債", year)
+    if total > liabilities:
+        raise SystemExit(f"{year}: 外部負債 {total} が総負債 {liabilities} を超える")
+    return {"total": total, **parts}
+
+
 def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi") -> dict:
     buckets = rows_from_text(text, ocr=ocr)
     activity = buckets["activity"]
@@ -348,7 +399,7 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
 
     income = {
         "tuition": only(activity, "学生生徒等納付金", year),
-        "subsidies": only(activity, "経常費等補助金", year) + facility_subsidy,
+        "subsidies": regular_subsidy(activity, year) + facility_subsidy,
         "donations": only(activity, "寄付金", year) + facility_donation + special_gift,
         "auxiliary": optional(activity, "付随事業収入", year),
         "interest": optional(activity, "受取利息・配当金", year),
@@ -384,6 +435,22 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
         "other": activity_expense - personnel - education - admin,
     }
     securities = [value for name, value, _marked in bs if name == "有価証券"]
+    education_income = only(activity, "教育活動収入計", year)
+    non_education_income = only(activity, "教育活動外収入計", year)
+    education_expense = only(activity, "教育活動支出計", year)
+    non_education_expense = optional(activity, "教育活動外支出計", year)
+    ordinary_income = education_income + non_education_income
+    ordinary_expense = education_expense + non_education_expense
+    ordinary_balance = only(activity, "経常収支差額", year)
+    if ordinary_balance != ordinary_income - ordinary_expense:
+        if abs(ordinary_balance - (ordinary_income - ordinary_expense)) <= 1000:
+            ordinary_balance = ordinary_income - ordinary_expense
+        else:
+            raise SystemExit(
+                f"{year}: 経常収支差額 {ordinary_balance} ≠ {ordinary_income - ordinary_expense}"
+            )
+    debt = external_liabilities(bs, year)
+    kifu = only(activity, "寄付金", year)
     payload = {
         "year": year,
         "income": income,
@@ -391,6 +458,22 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
         "activityIncome": activity_income,
         "activityExpense": activity_expense,
         "balanceBeforeReserve": balance,
+        "educationIncome": education_income,
+        "nonEducationIncome": non_education_income,
+        "educationExpense": education_expense,
+        "nonEducationExpense": non_education_expense,
+        "ordinaryIncome": ordinary_income,
+        "ordinaryExpense": ordinary_expense,
+        "ordinaryBalance": ordinary_balance,
+        "ordinarySubsidy": regular_subsidy(activity, year),
+        "ordinaryDonation": kifu,
+        "externalLiabilities": debt["total"],
+        "externalLiabilityParts": {
+            "loans": debt["loans"],
+            "bonds": debt["bonds"],
+            "unpaid": debt["unpaid"],
+            "notes": debt["notes"],
+        },
         "assets": {
             "fixed": only(bs, "固定資産", year),
             "current": only(bs, "流動資産", year),
@@ -439,6 +522,13 @@ SCHOOLS = {
         "sourceUrl": "https://www.tamabi.ac.jp/about/public-information/financial/",
         "require_all": True,
     },
+    "musabi": {
+        "name": "武蔵野美術大学",
+        "corporation": "学校法人武蔵野美術大学",
+        "source": "学校法人武蔵野美術大学 計算書類",
+        "sourceUrl": "https://www.musabi.ac.jp/outline/disclose/financial/",
+        "require_all": False,
+    },
     "zokei": {
         "name": "東京造形大学",
         "corporation": "学校法人桑沢学園",
@@ -480,7 +570,9 @@ def main() -> None:
         ocr_path = raw / f"fy{year}.txt"
         text = load_year_text(raw, year)
         if "事業活動収支計算書" not in collapse(text):
-            raise SystemExit(f"{year}: テキストを読めない")
+            if school["require_all"]:
+                raise SystemExit(f"{year}: テキストを読めない")
+            continue
         use_ocr = ocr_path.exists() and school_id == "tamabi"
         years.append(build_year(year, text, ocr=use_ocr, school=school_id))
     if not years:

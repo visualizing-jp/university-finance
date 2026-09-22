@@ -78,9 +78,136 @@ body {
   transform: scale(0.97);
 }
 
-.school-nav a:focus-visible {
+.school-nav a:focus-visible,
+.mode-nav button:focus-visible,
+.compare-metric select:focus-visible {
   outline: 2px solid var(--ai);
   outline-offset: 2px;
+}
+
+.mode-nav {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 14px;
+}
+
+.mode-nav button {
+  appearance: none;
+  margin: 0;
+  padding: 4px 12px 8px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 120ms var(--ease-out);
+}
+
+.mode-nav button[aria-current="page"] {
+  border-bottom-color: var(--shu);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.mode-nav button:active {
+  transform: scale(0.97);
+}
+
+.compare-metric {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.compare-metric select {
+  appearance: none;
+  margin: 0;
+  padding: 6px 28px 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: #fff
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6' fill='%235d6b76'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.compare-bars {
+  list-style: none;
+  margin: 18px 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compare-bars li {
+  display: grid;
+  grid-template-columns: 9.5em 1fr 5.5em;
+  align-items: center;
+  gap: 12px;
+}
+
+.compare-bars__name {
+  font-size: 14px;
+}
+
+.compare-bars__track {
+  position: relative;
+  height: 22px;
+  background: rgb(255 255 255 / 55%);
+}
+
+.compare-bars__zero {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--faint);
+}
+
+.compare-bars__fill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  transition:
+    left 600ms var(--ease-out),
+    width 600ms var(--ease-out);
+}
+
+.compare-bars__value {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  text-align: right;
+}
+
+.compare-year-rule,
+.compare-marker {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: transform 600ms var(--ease-out);
+}
+
+.compare-year-rule line {
+  stroke: var(--faint);
+  stroke-dasharray: 3 3;
+}
+
+.compare-definition {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .masthead__row {
@@ -113,108 +240,6 @@ h1 .sep {
   flex-wrap: wrap;
   gap: 4px;
   margin: 0 0 -1px;
-}
-
-.masthead .view-nav + .view-nav,
-.masthead .masthead__row + .view-nav {
-  margin-top: 8px;
-}
-
-.metric-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 18px 0 0;
-}
-
-.metric-nav button {
-  appearance: none;
-  margin: 0;
-  padding: 6px 10px;
-  border: 1px solid var(--rule);
-  background: #f7fafb;
-  color: var(--muted);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  transition:
-    color 150ms ease,
-    border-color 150ms ease,
-    background-color 150ms ease,
-    transform 120ms var(--ease-out);
-}
-
-.metric-nav button[aria-current="true"] {
-  border-color: var(--shu);
-  color: var(--ink);
-  background: #fff;
-  font-weight: 600;
-}
-
-.metric-nav button:active {
-  transform: scale(0.97);
-}
-
-.metric-nav button:focus-visible {
-  outline: 2px solid var(--ai);
-  outline-offset: 2px;
-}
-
-.cmp-hint {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: var(--faint);
-}
-
-.cmp-bars {
-  display: grid;
-  gap: 10px;
-  margin: 18px 0 8px;
-}
-
-.cmp-row {
-  display: grid;
-  grid-template-columns: minmax(7rem, 9rem) 1fr minmax(4rem, auto);
-  gap: 12px;
-  align-items: center;
-}
-
-.cmp-row__name {
-  font-size: 13px;
-}
-
-.cmp-row__value {
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  text-align: right;
-}
-
-.cmp-track {
-  position: relative;
-  height: 18px;
-  background: #f7fafb;
-  border: 1px solid var(--rule);
-}
-
-.cmp-zero {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--faint);
-}
-
-.cmp-fill {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  transition:
-    left 600ms var(--ease-out),
-    width 600ms var(--ease-out);
-}
-
-.cmp-lines {
-  margin-top: 28px;
 }
 
 .view-nav button,
@@ -261,8 +286,7 @@ h1 .sep {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .view-nav button:hover,
-  .metric-nav button:hover {
+  .view-nav button:hover {
     color: var(--ink);
   }
 }
@@ -607,28 +631,8 @@ h1 .sep {
     min-height: 480px;
   }
 
-  .view-nav,
-  .metric-nav {
+  .view-nav {
     width: 100%;
-  }
-
-  .cmp-row {
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "name value"
-      "bar bar";
-  }
-
-  .cmp-row__name {
-    grid-area: name;
-  }
-
-  .cmp-row__value {
-    grid-area: value;
-  }
-
-  .cmp-track {
-    grid-area: bar;
   }
 }
 
@@ -638,9 +642,11 @@ h1 .sep {
   .view-nav button,
   .year-tick,
   .school-nav a,
-  .stack-rect,
-  .metric-nav button,
-  .cmp-fill {
+  .mode-nav button,
+  .compare-bars__fill,
+  .compare-year-rule,
+  .compare-marker,
+  .stack-rect {
     transition: none;
   }
 }

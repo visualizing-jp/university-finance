@@ -1,0 +1,637 @@
+{
+  "id": "musabi",
+  "name": "武蔵野美術大学",
+  "corporation": "学校法人武蔵野美術大学",
+  "unit": "円",
+  "source": "学校法人武蔵野美術大学 計算書類",
+  "sourceUrl": "https://www.musabi.ac.jp/outline/disclose/financial/",
+  "years": [
+    {
+      "year": 2015,
+      "income": {
+        "tuition": 8149356534,
+        "subsidies": 835490106,
+        "donations": 93821404,
+        "auxiliary": 112972316,
+        "interest": 49333863,
+        "other": 310041049
+      },
+      "expense": {
+        "personnel": 4551219291,
+        "education": 3881707256,
+        "admin": 875879862,
+        "other": 317233069
+      },
+      "activityIncome": 9551015272,
+      "activityExpense": 9626039478,
+      "balanceBeforeReserve": -75024206,
+      "educationIncome": 9402063835,
+      "nonEducationIncome": 49333863,
+      "educationExpense": 9308806409,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9451397698,
+      "ordinaryExpense": 9308806409,
+      "ordinaryBalance": 142591289,
+      "ordinarySubsidy": 773406106,
+      "ordinaryDonation": 56741745,
+      "externalLiabilities": 1003067021,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 1003067021,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 44882267272,
+        "current": 5941973582
+      },
+      "liabilities": {
+        "fixed": 1865177264,
+        "current": 4270839770
+      },
+      "netAssets": {
+        "basicFund": 47791472963,
+        "carried": -3103249143
+      },
+      "operatingAssets": 19311488905,
+      "cash": {
+        "education": 1494430489,
+        "facility": -1024827908,
+        "other": -16930716,
+        "opening": 5093555404,
+        "closing": 5546227269
+      },
+      "cashDeposits": 5546227269
+    },
+    {
+      "year": 2016,
+      "income": {
+        "tuition": 8145023205,
+        "subsidies": 906074980,
+        "donations": 63272351,
+        "auxiliary": 128803559,
+        "interest": 11759934,
+        "other": 1872263111
+      },
+      "expense": {
+        "personnel": 4579626671,
+        "education": 3748218620,
+        "admin": 1060253648,
+        "other": 95917599
+      },
+      "activityIncome": 11127197140,
+      "activityExpense": 9484016538,
+      "balanceBeforeReserve": 1643180602,
+      "educationIncome": 11033004344,
+      "nonEducationIncome": 11759934,
+      "educationExpense": 9388098939,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 11044764278,
+      "ordinaryExpense": 9388098939,
+      "ordinaryBalance": 1656665339,
+      "ordinarySubsidy": 852043980,
+      "ordinaryDonation": 36674058,
+      "externalLiabilities": 570734170,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 570734170,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 44870268605,
+        "current": 6142161892
+      },
+      "liabilities": {
+        "fixed": 1934810676,
+        "current": 2746215399
+      },
+      "netAssets": {
+        "basicFund": 48417379910,
+        "carried": -2085975488
+      },
+      "operatingAssets": 20026452507,
+      "cash": {
+        "education": 1634474968,
+        "facility": -1380503431,
+        "other": -79078099,
+        "opening": 5546227269,
+        "closing": 5721120707
+      },
+      "cashDeposits": 5721120707
+    },
+    {
+      "year": 2017,
+      "income": {
+        "tuition": 8202496349,
+        "subsidies": 686546681,
+        "donations": 49690802,
+        "auxiliary": 104377368,
+        "interest": 9032616,
+        "other": 493831959
+      },
+      "expense": {
+        "personnel": 4614021968,
+        "education": 3665985847,
+        "admin": 889857151,
+        "other": 87104392
+      },
+      "activityIncome": 9545975775,
+      "activityExpense": 9256969358,
+      "balanceBeforeReserve": 289006417,
+      "educationIncome": 9519131439,
+      "nonEducationIncome": 9032616,
+      "educationExpense": 9169864966,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9528164055,
+      "ordinaryExpense": 9169864966,
+      "ordinaryBalance": 358299089,
+      "ordinarySubsidy": 686546681,
+      "ordinaryDonation": 32810882,
+      "externalLiabilities": 559229263,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 559229263,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 44604647367,
+        "current": 6722290188
+      },
+      "liabilities": {
+        "fixed": 2074043175,
+        "current": 2632483541
+      },
+      "netAssets": {
+        "basicFund": 48536210381,
+        "carried": -1915799542
+      },
+      "operatingAssets": 21194642943,
+      "cash": {
+        "education": 1534733813,
+        "facility": -939494384,
+        "other": -9863471,
+        "opening": 5721120707,
+        "closing": 6306496665
+      },
+      "cashDeposits": 6306496665
+    },
+    {
+      "year": 2018,
+      "income": {
+        "tuition": 8169497504,
+        "subsidies": 587299208,
+        "donations": 63261954,
+        "auxiliary": 35388018,
+        "interest": 64655378,
+        "other": 383860850
+      },
+      "expense": {
+        "personnel": 4377038392,
+        "education": 3615103623,
+        "admin": 1301282366,
+        "other": 104226997
+      },
+      "activityIncome": 9303962912,
+      "activityExpense": 9397651378,
+      "balanceBeforeReserve": -93688466,
+      "educationIncome": 9221271966,
+      "nonEducationIncome": 64655378,
+      "educationExpense": 9293424381,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9285927344,
+      "ordinaryExpense": 9293424381,
+      "ordinaryBalance": -7497037,
+      "ordinarySubsidy": 587299208,
+      "ordinaryDonation": 45262700,
+      "externalLiabilities": 818122616,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 818122616,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 44776862038,
+        "current": 6777902734
+      },
+      "liabilities": {
+        "fixed": 2152964571,
+        "current": 2875077828
+      },
+      "netAssets": {
+        "basicFund": 49117751681,
+        "carried": -2591029308
+      },
+      "operatingAssets": 22073816320,
+      "cash": {
+        "education": 1638155548,
+        "facility": -1382542370,
+        "other": -43745384,
+        "opening": 6306496665,
+        "closing": 6518364459
+      },
+      "cashDeposits": 6518364459
+    },
+    {
+      "year": 2019,
+      "income": {
+        "tuition": 8225652411,
+        "subsidies": 564978513,
+        "donations": 87506981,
+        "auxiliary": 34484629,
+        "interest": 113948924,
+        "other": 546783503
+      },
+      "expense": {
+        "personnel": 4450118722,
+        "education": 3722301964,
+        "admin": 878383869,
+        "other": 106503358
+      },
+      "activityIncome": 9573354961,
+      "activityExpense": 9157307913,
+      "balanceBeforeReserve": 416047048,
+      "educationIncome": 9323437325,
+      "nonEducationIncome": 113948924,
+      "educationExpense": 9050804555,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9437386249,
+      "ordinaryExpense": 9050804555,
+      "ordinaryBalance": 386581694,
+      "ordinarySubsidy": 558308513,
+      "ordinaryDonation": 72129738,
+      "externalLiabilities": 593923455,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 593923455,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 44292513880,
+        "current": 7432354196
+      },
+      "liabilities": {
+        "fixed": 2154366802,
+        "current": 2627731853
+      },
+      "netAssets": {
+        "basicFund": 49223535874,
+        "carried": -2280766453
+      },
+      "operatingAssets": 23290323098,
+      "cash": {
+        "education": 1288896360,
+        "facility": -796729280,
+        "other": 106822796,
+        "opening": 6518364459,
+        "closing": 7117354335
+      },
+      "cashDeposits": 7117354335
+    },
+    {
+      "year": 2020,
+      "income": {
+        "tuition": 8195131352,
+        "subsidies": 670421810,
+        "donations": 71894988,
+        "auxiliary": 35221324,
+        "interest": 63211690,
+        "other": 418188908
+      },
+      "expense": {
+        "personnel": 4551173390,
+        "education": 3907078306,
+        "admin": 761917362,
+        "other": 101676887
+      },
+      "activityIncome": 9454070072,
+      "activityExpense": 9321845945,
+      "balanceBeforeReserve": 132224127,
+      "educationIncome": 9372229107,
+      "nonEducationIncome": 63211690,
+      "educationExpense": 9220169058,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9435440797,
+      "ordinaryExpense": 9220169058,
+      "ordinaryBalance": 215271739,
+      "ordinarySubsidy": 670421810,
+      "ordinaryDonation": 54439353,
+      "externalLiabilities": 573368528,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 573368528,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 44858256276,
+        "current": 7138028407
+      },
+      "liabilities": {
+        "fixed": 2224264120,
+        "current": 2697027015
+      },
+      "netAssets": {
+        "basicFund": 50195956584,
+        "carried": -3120963036
+      },
+      "operatingAssets": 23409182819,
+      "cash": {
+        "education": 1692477085,
+        "facility": -1983171797,
+        "other": -30701305,
+        "opening": 7117354335,
+        "closing": 6795958318
+      },
+      "cashDeposits": 6795958318
+    },
+    {
+      "year": 2021,
+      "income": {
+        "tuition": 8413080841,
+        "subsidies": 712844223,
+        "donations": 34420721,
+        "auxiliary": 40614482,
+        "interest": 18035152,
+        "other": 2331887582
+      },
+      "expense": {
+        "personnel": 4543981219,
+        "education": 3641588449,
+        "admin": 776977911,
+        "other": 207313115
+      },
+      "activityIncome": 11550883001,
+      "activityExpense": 9169860694,
+      "balanceBeforeReserve": 2381022307,
+      "educationIncome": 9598886340,
+      "nonEducationIncome": 18035152,
+      "educationExpense": 8962547579,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9616921492,
+      "ordinaryExpense": 8962547579,
+      "ordinaryBalance": 654373913,
+      "ordinarySubsidy": 705559223,
+      "ordinaryDonation": 26772481,
+      "externalLiabilities": 642251531,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 642251531,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 45790291797,
+        "current": 8676157053
+      },
+      "liabilities": {
+        "fixed": 2207238473,
+        "current": 2803194522
+      },
+      "netAssets": {
+        "basicFund": 50333130918,
+        "carried": -877115063
+      },
+      "operatingAssets": 26357407834,
+      "cash": {
+        "education": 1935597832,
+        "facility": 635916595,
+        "other": -970881994,
+        "opening": 6795958318,
+        "closing": 8396590751
+      },
+      "cashDeposits": 8396590751
+    },
+    {
+      "year": 2022,
+      "income": {
+        "tuition": 8563483094,
+        "subsidies": 713409125,
+        "donations": 54128879,
+        "auxiliary": 66846768,
+        "interest": 45471174,
+        "other": 519953512
+      },
+      "expense": {
+        "personnel": 4667554556,
+        "education": 3960021326,
+        "admin": 811333722,
+        "other": 34088208
+      },
+      "activityIncome": 9963292552,
+      "activityExpense": 9472997812,
+      "balanceBeforeReserve": 490294740,
+      "educationIncome": 9876851158,
+      "nonEducationIncome": 45471174,
+      "educationExpense": 9438909604,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9922322332,
+      "ordinaryExpense": 9438909604,
+      "ordinaryBalance": 483412728,
+      "ordinarySubsidy": 684809125,
+      "ordinaryDonation": 41758659,
+      "externalLiabilities": 971496405,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 971496405,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 46727045743,
+        "current": 8554136763
+      },
+      "liabilities": {
+        "fixed": 2185195187,
+        "current": 3149676724
+      },
+      "netAssets": {
+        "basicFund": 51584725756,
+        "carried": -1638415161
+      },
+      "operatingAssets": 26569914450,
+      "cash": {
+        "education": 1817738096,
+        "facility": -2136220854,
+        "other": 79856514,
+        "opening": 8396590751,
+        "closing": 8157964507
+      },
+      "cashDeposits": 8157964507
+    },
+    {
+      "year": 2023,
+      "income": {
+        "tuition": 8713589888,
+        "subsidies": 781748194,
+        "donations": 76191868,
+        "auxiliary": 77317948,
+        "interest": 12979003,
+        "other": 596225535
+      },
+      "expense": {
+        "personnel": 4776769217,
+        "education": 3987681093,
+        "admin": 793882321,
+        "other": 234538821
+      },
+      "activityIncome": 10258052436,
+      "activityExpense": 9792871452,
+      "balanceBeforeReserve": 465180984,
+      "educationIncome": 10183129429,
+      "nonEducationIncome": 12979003,
+      "educationExpense": 9558332631,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 10196108432,
+      "ordinaryExpense": 9558332631,
+      "ordinaryBalance": 637775801,
+      "ordinarySubsidy": 728956194,
+      "ordinaryDonation": 67039864,
+      "externalLiabilities": 1096493537,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 1096493537,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 46953863683,
+        "current": 8990667739
+      },
+      "liabilities": {
+        "fixed": 2128912427,
+        "current": 3404127416
+      },
+      "netAssets": {
+        "basicFund": 51314923505,
+        "carried": -903431926
+      },
+      "operatingAssets": 27334916842,
+      "cash": {
+        "education": 1937517105,
+        "facility": -1205894845,
+        "other": -397458918,
+        "opening": 8157964507,
+        "closing": 8492127849
+      },
+      "cashDeposits": 8492127849
+    },
+    {
+      "year": 2024,
+      "income": {
+        "tuition": 9000366940,
+        "subsidies": 790790628,
+        "donations": 86430640,
+        "auxiliary": 70290405,
+        "interest": 34699262,
+        "other": 350958572
+      },
+      "expense": {
+        "personnel": 4467921735,
+        "education": 4024646864,
+        "admin": 922271703,
+        "other": 50303406
+      },
+      "activityIncome": 10333536447,
+      "activityExpense": 9465143708,
+      "balanceBeforeReserve": 868392739,
+      "educationIncome": 10281109845,
+      "nonEducationIncome": 34699262,
+      "educationExpense": 9414840302,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 10315809107,
+      "ordinaryExpense": 9414840302,
+      "ordinaryBalance": 900968805,
+      "ordinarySubsidy": 790790628,
+      "ordinaryDonation": 68703300,
+      "externalLiabilities": 1325167690,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 1325167690,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 47736994892,
+        "current": 9362712565
+      },
+      "liabilities": {
+        "fixed": 2191034108,
+        "current": 3628789031
+      },
+      "netAssets": {
+        "basicFund": 52429211298,
+        "carried": -1149326980
+      },
+      "operatingAssets": 28628606782,
+      "cash": {
+        "education": 2535015031,
+        "facility": -2347912516,
+        "other": 464102670,
+        "opening": 8492127849,
+        "closing": 9143333034
+      },
+      "cashDeposits": 9143333034
+    },
+    {
+      "year": 2025,
+      "income": {
+        "tuition": 9228250457,
+        "subsidies": 1147906638,
+        "donations": 80859821,
+        "auxiliary": 74826226,
+        "interest": 65305818,
+        "other": 558167942
+      },
+      "expense": {
+        "personnel": 4694320557,
+        "education": 4498851610,
+        "admin": 910652230,
+        "other": 256407827
+      },
+      "activityIncome": 11155316902,
+      "activityExpense": 10360232224,
+      "balanceBeforeReserve": 795084678,
+      "educationIncome": 11051692423,
+      "nonEducationIncome": 65305818,
+      "educationExpense": 10103824397,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 11116998241,
+      "ordinaryExpense": 10103824397,
+      "ordinaryBalance": 1013173844,
+      "ordinarySubsidy": 1121541638,
+      "ordinaryDonation": 68906160,
+      "externalLiabilities": 963931793,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 963931793,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 48459088704,
+        "current": 9323252412
+      },
+      "liabilities": {
+        "fixed": 2188449840,
+        "current": 3518922280
+      },
+      "netAssets": {
+        "basicFund": 54158093943,
+        "carried": -2083124947
+      },
+      "operatingAssets": 29285828791,
+      "cash": {
+        "education": 2340913862,
+        "facility": -2884103551,
+        "other": 350737122,
+        "opening": 9143333034,
+        "closing": 8950880467
+      },
+      "cashDeposits": 8950880467
+    }
+  ]
+}

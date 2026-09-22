@@ -44,6 +44,19 @@ for (const file of files) {
     if (row.activityIncome - row.activityExpense !== row.balanceBeforeReserve) {
       fail(`${tag}: 収支差額`);
     }
+    if (row.educationIncome + row.nonEducationIncome !== row.ordinaryIncome) {
+      fail(`${tag}: 経常収入`);
+    }
+    if (row.educationExpense + row.nonEducationExpense !== row.ordinaryExpense) {
+      fail(`${tag}: 経常支出`);
+    }
+    if (row.ordinaryIncome - row.ordinaryExpense !== row.ordinaryBalance) {
+      fail(`${tag}: 経常収支差額`);
+    }
+    const debt = row.externalLiabilityParts;
+    const debtSum = debt.loans + debt.bonds + debt.unpaid + debt.notes;
+    if (debtSum !== row.externalLiabilities) fail(`${tag}: 外部負債`);
+    if (row.externalLiabilities > liabilities) fail(`${tag}: 外部負債が総負債を超える`);
     if (assets !== liabilities + net) fail(`${tag}: 貸借が一致しない`);
     if (cashMove !== row.cash.closing) fail(`${tag}: 支払資金の橋`);
     if (row.cashDeposits !== row.cash.closing) fail(`${tag}: 現金預金 ≠ 翌年度繰越支払資金`);
