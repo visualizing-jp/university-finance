@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { formatEraYear } from "../lib/era.ts";
 import { formatYen } from "../lib/format.ts";
 import { formatPermalink, parsePermalink, snapYear, type ViewId } from "../lib/permalink.ts";
-import { UNIVERSITY_ID, type FinanceYear, type UniversityFinance } from "../lib/types.ts";
+import {
+  UNIVERSITIES,
+  universityById,
+  type FinanceYear,
+  type UniversityFinance,
+} from "../lib/types.ts";
 import { ViewNav } from "./ViewNav.tsx";
 import { BalanceView } from "./views/BalanceView.tsx";
 import { CashView } from "./views/CashView.tsx";
@@ -15,18 +20,19 @@ function applyPermalink(id: string, year: number, view: ViewId): void {
   window.history.replaceState({ id, year, view }, "", `${window.location.pathname}${next}`);
 }
 
-function pageTitle(year: number, view: ViewId): string {
-  if (view === "balance") return `多摩美術大学 ${year}年度の資産と負債`;
-  if (view === "cash") return `多摩美術大学 ${year}年度の資金の流れ`;
-  if (view === "trend") return "多摩美術大学の経年変化";
-  return `多摩美術大学 ${year}年度の収支`;
+function pageTitle(name: string, year: number, view: ViewId): string {
+  if (view === "balance") return `${name} ${year}年度の資産と負債`;
+  if (view === "cash") return `${name} ${year}年度の資金の流れ`;
+  if (view === "trend") return `${name}の経年変化`;
+  return `${name} ${year}年度の収支`;
 }
 
 export function App() {
   const boot = parsePermalink(window.location.search);
+  const school = universityById(boot.id);
   const [data, setData] = useState<UniversityFinance | null>(null);
   const [error, setError] = useState<string | null>(
-    boot.id != null && boot.id !== UNIVERSITY_ID ? `「${boot.id}」はまだありません。` : null,
+    school == null ? `「${boot.id}」はまだありません。` : null,
   );
   const [year, setYear] = useState<number | null>(null);
   const [view, setView] = useState<ViewId>(boot.view);
@@ -37,9 +43,9 @@ export function App() {
   }, [year]);
 
   useEffect(() => {
-    if (boot.id != null && boot.id !== UNIVERSITY_ID) return;
+    if (school == null) return;
     let cancelled = false;
-    fetch(`${import.meta.env.BASE_URL}data/tamabi.json`)
+    fetch(`${import.meta.env.BASE_URL}data/${school.file}`)
       .then((res) => {
         if (!res.ok) throw new Error(`データの読み込みに失敗しました（${res.status}）`);
         return res.json() as Promise<UniversityFinance>;
@@ -55,13 +61,13 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [boot.id]);
+  }, [school]);
 
   useEffect(() => {
-    if (year == null) return;
-    applyPermalink(UNIVERSITY_ID, year, view);
-    document.title = pageTitle(year, view);
-  }, [year, view]);
+    if (year == null || data == null) return;
+    applyPermalink(data.id, year, view);
+    document.title = pageTitle(data.name, year, view);
+  }, [year, view, data]);
 
   if (error && data == null) {
     return (
@@ -80,9 +86,20 @@ export function App() {
     <div className="page">
       <header className="masthead">
         <p className="eyebrow">学校法人の計算書類</p>
+        <nav className="school-nav" aria-label="学校">
+          {UNIVERSITIES.map((item) => (
+            <a
+              key={item.id}
+              href={formatPermalink(item.id, year ?? boot.year ?? 2025, view)}
+              aria-current={data?.id === item.id ? "page" : undefined}
+            >
+              {item.name}
+            </a>
+          ))}
+        </nav>
         <div className="masthead__row">
           <h1>
-            多摩美術大学
+            {data?.name ?? school?.name ?? "学校法人"}
             <span className="sep">の経営状況</span>
           </h1>
           <ViewNav view={view} onView={setView} />

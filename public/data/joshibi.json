@@ -1,0 +1,256 @@
+{
+  "id": "joshibi",
+  "name": "女子美術大学",
+  "corporation": "学校法人女子美術大学",
+  "unit": "円",
+  "source": "学校法人女子美術大学 計算書類",
+  "sourceUrl": "https://www.joshibi.ac.jp/about/report/details",
+  "years": [
+    {
+      "year": 2020,
+      "income": {
+        "tuition": 5865990000,
+        "subsidies": 923711000,
+        "donations": 2483000,
+        "auxiliary": 143434000,
+        "interest": 115044000,
+        "other": 317505000
+      },
+      "expense": {
+        "personnel": 3305340000,
+        "education": 2618239000,
+        "admin": 730022000,
+        "other": 220518000
+      },
+      "activityIncome": 7368167000,
+      "activityExpense": 6874119000,
+      "balanceBeforeReserve": 494048000,
+      "assets": {
+        "fixed": 39883241000,
+        "current": 10018743000
+      },
+      "liabilities": {
+        "fixed": 1708194000,
+        "current": 2682621000
+      },
+      "netAssets": {
+        "basicFund": 49716915000,
+        "carried": -4205746000
+      },
+      "operatingAssets": 26817553000,
+      "cash": {
+        "education": 1469929000,
+        "facility": -3079705000,
+        "other": 278687000,
+        "opening": 11147762000,
+        "closing": 9816673000
+      },
+      "cashDeposits": 9816673000
+    },
+    {
+      "year": 2021,
+      "income": {
+        "tuition": 5879161000,
+        "subsidies": 935537000,
+        "donations": 11514000,
+        "auxiliary": 172594000,
+        "interest": 103929000,
+        "other": 287649000
+      },
+      "expense": {
+        "personnel": 3411998000,
+        "education": 2662042000,
+        "admin": 720420000,
+        "other": 205028000
+      },
+      "activityIncome": 7390384000,
+      "activityExpense": 6999488000,
+      "balanceBeforeReserve": 390896000,
+      "assets": {
+        "fixed": 40438368000,
+        "current": 10018173000
+      },
+      "liabilities": {
+        "fixed": 1709219000,
+        "current": 2845256000
+      },
+      "netAssets": {
+        "basicFund": 51211553000,
+        "carried": -5309487000
+      },
+      "operatingAssets": 27387997000,
+      "cash": {
+        "education": 1369374000,
+        "facility": -1592764000,
+        "other": 159234000,
+        "opening": 9816673000,
+        "closing": 9752517000
+      },
+      "cashDeposits": 9752517000
+    },
+    {
+      "year": 2022,
+      "income": {
+        "tuition": 5980333000,
+        "subsidies": 964404000,
+        "donations": 30943000,
+        "auxiliary": 183384000,
+        "interest": 88442000,
+        "other": 381251000
+      },
+      "expense": {
+        "personnel": 3611726000,
+        "education": 2749562000,
+        "admin": 823916000,
+        "other": 229955000
+      },
+      "activityIncome": 7628757000,
+      "activityExpense": 7415159000,
+      "balanceBeforeReserve": 213598000,
+      "assets": {
+        "fixed": 41173467000,
+        "current": 9912670000
+      },
+      "liabilities": {
+        "fixed": 1700620000,
+        "current": 3269853000
+      },
+      "netAssets": {
+        "basicFund": 52621508000,
+        "carried": -6505844000
+      },
+      "operatingAssets": 27236147000,
+      "cash": {
+        "education": 1409601000,
+        "facility": -1649542000,
+        "other": 93291000,
+        "opening": 9752517000,
+        "closing": 9605867000
+      },
+      "cashDeposits": 9605867000
+    },
+    {
+      "year": 2023,
+      "income": {
+        "tuition": 6118820000,
+        "subsidies": 973979000,
+        "donations": 11242000,
+        "auxiliary": 137348000,
+        "interest": 532297000,
+        "other": 300563000
+      },
+      "expense": {
+        "personnel": 3666254000,
+        "education": 2911485000,
+        "admin": 744610000,
+        "other": 377153000
+      },
+      "activityIncome": 8074249000,
+      "activityExpense": 7699502000,
+      "balanceBeforeReserve": 374747000,
+      "assets": {
+        "fixed": 40891779000,
+        "current": 10417049000
+      },
+      "liabilities": {
+        "fixed": 1700127000,
+        "current": 3118290000
+      },
+      "netAssets": {
+        "basicFund": 52889480000,
+        "carried": -6399069000
+      },
+      "operatingAssets": 26915289000,
+      "cash": {
+        "education": 1071139000,
+        "facility": -1019364000,
+        "other": 492967000,
+        "opening": 9605867000,
+        "closing": 10150609000
+      },
+      "cashDeposits": 10150609000
+    },
+    {
+      "year": 2024,
+      "income": {
+        "tuition": 6076085000,
+        "subsidies": 1097570000,
+        "donations": 28739000,
+        "auxiliary": 109821000,
+        "interest": 141044000,
+        "other": 292506000
+      },
+      "expense": {
+        "personnel": 3667887000,
+        "education": 2922157000,
+        "admin": 1014024000,
+        "other": 46280000
+      },
+      "activityIncome": 7745765000,
+      "activityExpense": 7650348000,
+      "balanceBeforeReserve": 95417000,
+      "assets": {
+        "fixed": 41620195000,
+        "current": 9744932000
+      },
+      "liabilities": {
+        "fixed": 1763513000,
+        "current": 3015788000
+      },
+      "netAssets": {
+        "basicFund": 54301677000,
+        "carried": -7715851000
+      },
+      "operatingAssets": 26321577000,
+      "cash": {
+        "education": 856156000,
+        "facility": -1565402000,
+        "other": 120854000,
+        "opening": 10150609000,
+        "closing": 9562217000
+      },
+      "cashDeposits": 9562217000
+    },
+    {
+      "year": 2025,
+      "income": {
+        "tuition": 6258416500,
+        "subsidies": 1294931318,
+        "donations": 108691066,
+        "auxiliary": 111148984,
+        "interest": 117384579,
+        "other": 386694505
+      },
+      "expense": {
+        "personnel": 3873671739,
+        "education": 3266689961,
+        "admin": 906984246,
+        "other": 214122015
+      },
+      "activityIncome": 8277266952,
+      "activityExpense": 8261467961,
+      "balanceBeforeReserve": 15798991,
+      "assets": {
+        "fixed": 42168591305,
+        "current": 9603682024
+      },
+      "liabilities": {
+        "fixed": 1871527890,
+        "current": 3299118982
+      },
+      "netAssets": {
+        "basicFund": 55599211623,
+        "carried": -8997585166
+      },
+      "operatingAssets": 25206679665,
+      "cash": {
+        "education": 1224790946,
+        "facility": -1517451522,
+        "other": -29617091,
+        "opening": 9562217332,
+        "closing": 9239939665
+      },
+      "cashDeposits": 9239939665
+    }
+  ]
+}

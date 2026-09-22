@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "学校法人多摩美術大学の計算書類を、収支・資産・資金・経年で見る",
+  "description": "美術・芸術系の学校法人の計算書類を、収支・資産・資金・経年で見る",
   "license": "MIT",
   "engines": {
     "node": ">=22.18"
   },
   "scripts": {
     "data": "python3 scripts/extract_tamabi.py",
-    "verify": "node scripts/verify.ts",
+    "verify": "node --experimental-strip-types --no-warnings scripts/verify.ts",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
