@@ -53,6 +53,36 @@ body {
   color: var(--shu-deep);
 }
 
+.school-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 12px;
+}
+
+.school-nav a {
+  color: var(--muted);
+  font-size: 13px;
+  text-decoration: none;
+  transition:
+    color 150ms ease,
+    transform 120ms var(--ease-out);
+}
+
+.school-nav a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.school-nav a:active {
+  transform: scale(0.97);
+}
+
+.school-nav a:focus-visible {
+  outline: 2px solid var(--ai);
+  outline-offset: 2px;
+}
+
 .masthead__row {
   display: flex;
   align-items: flex-end;
@@ -484,6 +514,7 @@ h1 .sep {
   .year-rail__head,
   .view-nav button,
   .year-tick,
+  .school-nav a,
   .stack-rect {
     transition: none;
   }
