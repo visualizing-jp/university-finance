@@ -25,6 +25,22 @@
       "activityIncome": 8658402061,
       "activityExpense": 7502408404,
       "balanceBeforeReserve": 1155993657,
+      "educationIncome": 8475282584,
+      "nonEducationIncome": 122012331,
+      "educationExpense": 7493384395,
+      "nonEducationExpense": 6957442,
+      "ordinaryIncome": 8597294915,
+      "ordinaryExpense": 7500341837,
+      "ordinaryBalance": 1096953078,
+      "ordinarySubsidy": 612990744,
+      "ordinaryDonation": 53899460,
+      "externalLiabilities": 474713629,
+      "externalLiabilityParts": {
+        "loans": 219710000,
+        "bonds": 0,
+        "unpaid": 255003629,
+        "notes": 0
+      },
       "assets": {
         "fixed": 54871486805,
         "current": 12822423723
@@ -66,6 +82,22 @@
       "activityIncome": 8843388731,
       "activityExpense": 7933976413,
       "balanceBeforeReserve": 909412318,
+      "educationIncome": 8717823475,
+      "nonEducationIncome": 66066922,
+      "educationExpense": 7850546191,
+      "nonEducationExpense": 4141938,
+      "ordinaryIncome": 8783890397,
+      "ordinaryExpense": 7854688129,
+      "ordinaryBalance": 929202268,
+      "ordinarySubsidy": 601753891,
+      "ordinaryDonation": 67393000,
+      "externalLiabilities": 369248555,
+      "externalLiabilityParts": {
+        "loans": 109440000,
+        "bonds": 0,
+        "unpaid": 259808555,
+        "notes": 0
+      },
       "assets": {
         "fixed": 55090052015,
         "current": 13749582070
@@ -107,6 +139,22 @@
       "activityIncome": 8823522519,
       "activityExpense": 7536039393,
       "balanceBeforeReserve": 1287483126,
+      "educationIncome": 8740328092,
+      "nonEducationIncome": 57975364,
+      "educationExpense": 7532502664,
+      "nonEducationExpense": 2263609,
+      "ordinaryIncome": 8798303456,
+      "ordinaryExpense": 7534766273,
+      "ordinaryBalance": 1263537183,
+      "ordinarySubsidy": 595577255,
+      "ordinaryDonation": 31050000,
+      "externalLiabilities": 389985990,
+      "externalLiabilityParts": {
+        "loans": 54720000,
+        "bonds": 0,
+        "unpaid": 335265990,
+        "notes": 0
+      },
       "assets": {
         "fixed": 55200679411,
         "current": 14818478114
@@ -148,6 +196,22 @@
       "activityIncome": 8901468616,
       "activityExpense": 7586623578,
       "balanceBeforeReserve": 1314845038,
+      "educationIncome": 8829426691,
+      "nonEducationIncome": 64260341,
+      "educationExpense": 7583943484,
+      "nonEducationExpense": 1114489,
+      "ordinaryIncome": 8893687032,
+      "ordinaryExpense": 7585057973,
+      "ordinaryBalance": 1308629059,
+      "ordinarySubsidy": 556527580,
+      "ordinaryDonation": 2715044,
+      "externalLiabilities": 254624806,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 254624806,
+        "notes": 0
+      },
       "assets": {
         "fixed": 55273964236,
         "current": 15917432727
@@ -189,6 +253,22 @@
       "activityIncome": 8833666731,
       "activityExpense": 7716182475,
       "balanceBeforeReserve": 1117484256,
+      "educationIncome": 8736086295,
+      "nonEducationIncome": 70311055,
+      "educationExpense": 7666385623,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 8806397350,
+      "ordinaryExpense": 7666385623,
+      "ordinaryBalance": 1140011727,
+      "ordinarySubsidy": 505974573,
+      "ordinaryDonation": 8168300,
+      "externalLiabilities": 374672531,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 374672531,
+        "notes": 0
+      },
       "assets": {
         "fixed": 57021808235,
         "current": 15474733535
@@ -230,6 +310,22 @@
       "activityIncome": 9023714853,
       "activityExpense": 8226989498,
       "balanceBeforeReserve": 796725355,
+      "educationIncome": 8946563143,
+      "nonEducationIncome": 67580028,
+      "educationExpense": 8220747571,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9014143171,
+      "ordinaryExpense": 8220747571,
+      "ordinaryBalance": 793395600,
+      "ordinarySubsidy": 605282673,
+      "ordinaryDonation": 52787500,
+      "externalLiabilities": 371334786,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 371334786,
+        "notes": 0
+      },
       "assets": {
         "fixed": 57888187103,
         "current": 14531514840
@@ -271,6 +367,22 @@
       "activityIncome": 9272689611,
       "activityExpense": 8138035594,
       "balanceBeforeReserve": 1134654017,
+      "educationIncome": 9164115268,
+      "nonEducationIncome": 71469251,
+      "educationExpense": 8135868323,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9235584519,
+      "ordinaryExpense": 8135868323,
+      "ordinaryBalance": 1099716196,
+      "ordinarySubsidy": 691535727,
+      "ordinaryDonation": 12481450,
+      "externalLiabilities": 238179931,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 238179931,
+        "notes": 0
+      },
       "assets": {
         "fixed": 59497451529,
         "current": 14729122285
@@ -312,6 +424,22 @@
       "activityIncome": 9393574498,
       "activityExpense": 8620124461,
       "balanceBeforeReserve": 773450037,
+      "educationIncome": 9266192721,
+      "nonEducationIncome": 78355489,
+      "educationExpense": 8605446505,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9344548210,
+      "ordinaryExpense": 8605446505,
+      "ordinaryBalance": 739101705,
+      "ordinarySubsidy": 645292082,
+      "ordinaryDonation": 11575282,
+      "externalLiabilities": 534632226,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 534632226,
+        "notes": 0
+      },
       "assets": {
         "fixed": 64165262010,
         "current": 11715708638
@@ -353,6 +481,22 @@
       "activityIncome": 12388896762,
       "activityExpense": 9808399203,
       "balanceBeforeReserve": 2580497559,
+      "educationIncome": 10470563364,
+      "nonEducationIncome": 82148990,
+      "educationExpense": 9320202909,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 10552712354,
+      "ordinaryExpense": 9320202909,
+      "ordinaryBalance": 1232509445,
+      "ordinarySubsidy": 643716597,
+      "ordinaryDonation": 12098176,
+      "externalLiabilities": 1003757904,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 1003757904,
+        "notes": 0
+      },
       "assets": {
         "fixed": 65046109837,
         "current": 13604488452
@@ -394,6 +538,22 @@
       "activityIncome": 9585687656,
       "activityExpense": 8663936284,
       "balanceBeforeReserve": 921751372,
+      "educationIncome": 9369462832,
+      "nonEducationIncome": 126864928,
+      "educationExpense": 8636994407,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9496327760,
+      "ordinaryExpense": 8636994407,
+      "ordinaryBalance": 859333353,
+      "ordinarySubsidy": 683404667,
+      "ordinaryDonation": 27818500,
+      "externalLiabilities": 757117058,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 757117058,
+        "notes": 0
+      },
       "assets": {
         "fixed": 67403828835,
         "current": 11814471931
@@ -435,6 +595,22 @@
       "activityIncome": 10002353697,
       "activityExpense": 9615816954,
       "balanceBeforeReserve": 386536743,
+      "educationIncome": 9648921610,
+      "nonEducationIncome": 253200085,
+      "educationExpense": 9295372880,
+      "nonEducationExpense": 0,
+      "ordinaryIncome": 9902121695,
+      "ordinaryExpense": 9295372880,
+      "ordinaryBalance": 606748815,
+      "ordinarySubsidy": 909183806,
+      "ordinaryDonation": 61417000,
+      "externalLiabilities": 922722708,
+      "externalLiabilityParts": {
+        "loans": 0,
+        "bonds": 0,
+        "unpaid": 922722708,
+        "notes": 0
+      },
       "assets": {
         "fixed": 68089825314,
         "current": 10007730763

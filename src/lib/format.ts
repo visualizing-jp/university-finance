@@ -26,6 +26,14 @@ export function formatYen(yen: number): string {
   return `${sign}${out}円`;
 }
 
+/** 比率はパーセントで小数1桁。年は小数1桁。負は△。 */
+export function formatMetric(value: number, unit: "percent" | "year"): string {
+  const sign = value < 0 ? "△" : "";
+  const abs = Math.abs(value);
+  if (unit === "year") return `${sign}${abs.toFixed(1)}年`;
+  return `${sign}${(abs * 100).toFixed(1)}%`;
+}
+
 export function formatShare(value: number, total: number): string {
   if (total <= 0) return "—";
   return `${((Math.abs(value) / total) * 100).toFixed(1)}%`;
