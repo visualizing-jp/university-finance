@@ -3,6 +3,7 @@ import { scaleLinear, scalePoint } from "d3-scale";
 import { formatMetric } from "../../lib/format.ts";
 import { metricGroups, schoolColor, type Metric } from "../../lib/metrics.ts";
 import type { FinanceYear, UniversityFinance } from "../../lib/types.ts";
+import { responsiveSvgProps } from "../chart/responsiveSvg.ts";
 import { useSize } from "../hooks/useSize.ts";
 import { YearSlider } from "../sankey/YearSlider.tsx";
 
@@ -106,7 +107,8 @@ function CompareLines({
   year: number;
 }) {
   const [ref, size] = useSize<HTMLDivElement>();
-  const width = Math.max(size.width, 320);
+  const ready = size.width >= 8;
+  const width = ready ? size.width : 640;
   const height = 280;
   const pad = { top: 16, right: 16, bottom: 28, left: 64 };
   const series = schools.map((school, index) => ({
@@ -145,7 +147,11 @@ function CompareLines({
 
   return (
     <div className="chart-wrap chart-wrap--line" ref={ref}>
-      <svg width={width} height={height} role="img" aria-label={`${metric.name}の2015年度以降`}>
+      <svg
+        {...responsiveSvgProps(width, height, size.width)}
+        role="img"
+        aria-label={`${metric.name}の2015年度以降`}
+      >
         {ticks.map((tick) => (
           <g key={tick}>
             <line className="grid" x1={pad.left} x2={width - pad.right} y1={y(tick)} y2={y(tick)} />

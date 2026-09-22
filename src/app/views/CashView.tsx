@@ -1,5 +1,6 @@
 import { formatYen } from "../../lib/format.ts";
 import type { FinanceYear } from "../../lib/types.ts";
+import { responsiveSvgProps } from "../chart/responsiveSvg.ts";
 import { useSize } from "../hooks/useSize.ts";
 import { YearSlider } from "../sankey/YearSlider.tsx";
 import { COLOR_DEDUCT, COLOR_EXPENSE, COLOR_TOTAL } from "../sankey/colors.ts";
@@ -45,7 +46,7 @@ export function CashView({ row, years, onYear }: CashViewProps) {
 
 function Waterfall({ row }: { row: FinanceYear }) {
   const [ref, size] = useSize<HTMLDivElement>();
-  const width = Math.max(size.width, 640);
+  const width = 720;
   const height = 420;
   const steps: Step[] = [
     { key: "opening", label: "前年度繰越", value: row.cash.opening, total: true },
@@ -71,7 +72,11 @@ function Waterfall({ row }: { row: FinanceYear }) {
 
   return (
     <div className="chart-wrap" ref={ref}>
-      <svg width={width} height={height} role="img" aria-label={`${row.year}年度の活動区分資金収支`}>
+      <svg
+        {...responsiveSvgProps(width, height, size.width)}
+        role="img"
+        aria-label={`${row.year}年度の活動区分資金収支`}
+      >
         {bars.map((bar, index) => {
           const x = pad.left + slot * index + (slot - barW) / 2;
           const top = Math.min(bar.from, bar.to);
