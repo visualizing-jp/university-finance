@@ -1,23 +1,40 @@
 import { useEffect, useRef, useState } from "react";
 import { formatEraYear } from "../lib/era.ts";
 import { formatYen } from "../lib/format.ts";
-import { formatPermalink, parsePermalink, snapYear, type ViewId } from "../lib/permalink.ts";
+import {
+  DEFAULT_YEAR,
+  formatComparePermalink,
+  formatPermalink,
+  parsePermalink,
+  snapYear,
+  type ModeId,
+  type ViewId,
+} from "../lib/permalink.ts";
+import type { MetricId } from "../lib/metrics.ts";
 import {
   UNIVERSITIES,
   universityById,
   type FinanceYear,
   type UniversityFinance,
 } from "../lib/types.ts";
+import { ModeNav } from "./ModeNav.tsx";
 import { ViewNav } from "./ViewNav.tsx";
+import { CompareView } from "./views/CompareView.tsx";
 import { BalanceView } from "./views/BalanceView.tsx";
 import { CashView } from "./views/CashView.tsx";
 import { IncomeView } from "./views/IncomeView.tsx";
 import { TrendView } from "./views/TrendView.tsx";
 
-function applyPermalink(id: string, year: number, view: ViewId): void {
+function applyLookPermalink(id: string, year: number, view: ViewId): void {
   const next = formatPermalink(id, year, view);
   if (window.location.search === next) return;
   window.history.replaceState({ id, year, view }, "", `${window.location.pathname}${next}`);
+}
+
+function applyComparePermalink(year: number, metric: MetricId): void {
+  const next = formatComparePermalink(year, metric);
+  if (window.location.search === next) return;
+  window.history.replaceState({ mode: "compare", year, metric }, "", `${window.location.pathname}${next}`);
 }
 
 function pageTitle(name: string, year: number, view: ViewId): string {
@@ -27,14 +44,24 @@ function pageTitle(name: string, year: number, view: ViewId): string {
   return `${name} ${year}年度の収支`;
 }
 
+function unionYears(schools: UniversityFinance[]): number[] {
+  return [...new Set(schools.flatMap((school) => school.years.map((row) => row.year)))].sort(
+    (a, b) => a - b,
+  );
+}
+
 export function App() {
   const boot = parsePermalink(window.location.search);
-  const school = universityById(boot.id);
+  const [mode, setMode] = useState<ModeId>(boot.mode);
+  const [metric, setMetric] = useState<MetricId>(boot.metric);
+  const [lookId, setLookId] = useState(boot.id ?? UNIVERSITIES[0].id);
+  const school = universityById(lookId);
   const [data, setData] = useState<UniversityFinance | null>(null);
+  const [catalog, setCatalog] = useState<UniversityFinance[] | null>(null);
   const [error, setError] = useState<string | null>(
-    school == null ? `「${boot.id}」はまだありません。` : null,
+    mode === "look" && school == null ? `「${lookId}」はまだありません。` : null,
   );
-  const [year, setYear] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(boot.year);
   const [view, setView] = useState<ViewId>(boot.view);
   const yearRef = useRef<number | null>(boot.year);
 
@@ -43,7 +70,7 @@ export function App() {
   }, [year]);
 
   useEffect(() => {
-    if (school == null) return;
+    if (mode !== "look" || school == null) return;
     let cancelled = false;
     fetch(`${import.meta.env.BASE_URL}data/${school.file}`)
       .then((res) => {
@@ -61,15 +88,45 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [school]);
+  }, [school, mode]);
 
   useEffect(() => {
-    if (year == null || data == null) return;
-    applyPermalink(data.id, year, view);
-    document.title = pageTitle(data.name, year, view);
-  }, [year, view, data]);
+    if (mode !== "compare") return;
+    let cancelled = false;
+    Promise.all(
+      UNIVERSITIES.map((item) =>
+        fetch(`${import.meta.env.BASE_URL}data/${item.file}`).then((res) => {
+          if (!res.ok) throw new Error(`データの読み込みに失敗しました（${res.status}）`);
+          return res.json() as Promise<UniversityFinance>;
+        }),
+      ),
+    )
+      .then((rows) => {
+        if (cancelled) return;
+        setCatalog(rows);
+        setYear(snapYear(unionYears(rows), yearRef.current ?? DEFAULT_YEAR));
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "読み込みに失敗しました");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
 
-  if (error && data == null) {
+  useEffect(() => {
+    if (mode === "compare") {
+      const nextYear = year ?? DEFAULT_YEAR;
+      applyComparePermalink(nextYear, metric);
+      document.title = `大学を比べる ${nextYear}年度`;
+      return;
+    }
+    if (year == null || data == null) return;
+    applyLookPermalink(data.id, year, view);
+    document.title = pageTitle(data.name, year, view);
+  }, [mode, year, view, data, metric]);
+
+  if (error && data == null && catalog == null) {
     return (
       <main className="page">
         <p className="status">{error}</p>
@@ -77,7 +134,10 @@ export function App() {
     );
   }
 
-  const years = data?.years.map((row) => row.year) ?? [];
+  const years =
+    mode === "compare"
+      ? (catalog != null ? unionYears(catalog) : [])
+      : (data?.years.map((row) => row.year) ?? []);
   const row: FinanceYear | null = data?.years.find((item) => item.year === year) ?? null;
   const first = years[0];
   const last = years[years.length - 1];
@@ -86,28 +146,58 @@ export function App() {
     <div className="page">
       <header className="masthead">
         <p className="eyebrow">学校法人の計算書類</p>
-        <nav className="school-nav" aria-label="学校">
-          {UNIVERSITIES.map((item) => (
-            <a
-              key={item.id}
-              href={formatPermalink(item.id, year ?? boot.year ?? 2025, view)}
-              aria-current={data?.id === item.id ? "page" : undefined}
-            >
-              {item.name}
-            </a>
-          ))}
-        </nav>
+        {mode === "look" ? (
+          <nav className="school-nav" aria-label="学校">
+            {UNIVERSITIES.map((item) => (
+              <a
+                key={item.id}
+                href={formatPermalink(item.id, year ?? boot.year ?? DEFAULT_YEAR, view)}
+                aria-current={data?.id === item.id ? "page" : undefined}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setLookId(item.id);
+                  setMode("look");
+                }}
+              >
+                {item.name}
+              </a>
+            ))}
+          </nav>
+        ) : null}
         <div className="masthead__row">
           <h1>
-            {data?.name ?? school?.name ?? "学校法人"}
-            <span className="sep">の経営状況</span>
+            {mode === "compare" ? "大学を比べる" : (data?.name ?? school?.name ?? "学校法人")}
+            {mode === "look" ? <span className="sep">の経営状況</span> : null}
           </h1>
-          <ViewNav view={view} onView={setView} />
+          <ModeNav mode={mode} onMode={setMode} />
         </div>
+        {mode === "look" ? <ViewNav view={view} onView={setView} /> : null}
       </header>
-      <p className="lede">{lede(view, row, first, last)}</p>
+      <p className="lede">
+        {mode === "compare"
+          ? compareLede(year, first, last)
+          : lede(view, row, first, last)}
+      </p>
       {error ? <p className="status">{error}</p> : null}
-      {data && row ? (
+      {mode === "compare" ? (
+        catalog != null && year != null ? (
+          <>
+            <CompareView
+              schools={catalog}
+              year={year}
+              years={years}
+              metric={metric}
+              onYear={setYear}
+              onMetric={setMetric}
+            />
+            <footer className="source">
+              比率の分母は事業活動収入（経常収入は未抽出）。学生数がないため1人あたりは出していない。日本大学は法人全体。出典は各学校の計算書類。円を百万円に四捨五入して表示。2014年度以前の消費収支計算書は含まない。
+            </footer>
+          </>
+        ) : error ? null : (
+          <p className="status">読み込み中</p>
+        )
+      ) : data && row ? (
         <>
           {view === "income" ? <IncomeView row={row} years={years} onYear={setYear} /> : null}
           {view === "balance" ? <BalanceView row={row} years={years} onYear={setYear} /> : null}
@@ -124,6 +214,12 @@ export function App() {
       )}
     </div>
   );
+}
+
+function compareLede(year: number | null, first: number | undefined, last: number | undefined): string {
+  const span = first != null && last != null ? `${first}–${last}年度。` : "";
+  const when = year != null ? `${year}年度（${formatEraYear(year)}）。` : "";
+  return `${when}${span}大学によって、経営や教育への投資はどう違うか。`;
 }
 
 function lede(

@@ -48,15 +48,15 @@ export interface UniversityFinance {
 }
 
 export const UNIVERSITIES = [
-  { id: "tamabi", file: "tamabi.json", name: "多摩美術大学" },
-  { id: "zokei", file: "zokei.json", name: "東京造形大学" },
-  { id: "joshibi", file: "joshibi.json", name: "女子美術大学" },
-  { id: "nichidai", file: "nichidai.json", name: "日本大学" },
+  { id: "tamabi", file: "tamabi.json", name: "多摩美術大学", color: "#c51b7d" },
+  { id: "zokei", file: "zokei.json", name: "東京造形大学", color: "#4d9221" },
+  { id: "joshibi", file: "joshibi.json", name: "女子美術大学", color: "#8e0152" },
+  { id: "nichidai", file: "nichidai.json", name: "日本大学", color: "#2c3338" },
 ] as const;
 
 export type UniversityId = (typeof UNIVERSITIES)[number]["id"];
 
 export function universityById(id: string | null): (typeof UNIVERSITIES)[number] | null {
-  const key = id ?? "tamabi";
-  return UNIVERSITIES.find((school) => school.id === key) ?? null;
+  if (id == null) return null;
+  return UNIVERSITIES.find((school) => school.id === id) ?? null;
 }

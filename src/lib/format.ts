@@ -30,3 +30,8 @@ export function formatShare(value: number, total: number): string {
   if (total <= 0) return "—";
   return `${((Math.abs(value) / total) * 100).toFixed(1)}%`;
 }
+
+export function formatRatio(value: number): string {
+  const sign = value < 0 ? "△" : "";
+  return `${sign}${(Math.abs(value) * 100).toFixed(1)}%`;
+}

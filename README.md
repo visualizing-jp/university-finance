@@ -17,15 +17,16 @@ npm run verify
 npm run dev
 ```
 
-アドレスバーが、見ている学校・年度と切り口です。
+ルート（`/`）は比較ページへ置き換える。
 
 ```
+/?mode=compare&year=2025
 /?id=tamabi&year=2024
 /?id=zokei&year=2025
 /?id=joshibi&year=2025
 /?id=nichidai&year=2025
 ```
 
-`view` の既定 `income` は URL から省く。
+比較の既定指標 `educationRatio` と、個別大学の既定 `view=income` は URL から省く。
 
 数値の正本は公式の会計報告PDF。科目の畳み方は [`docs/accounts.md`](docs/accounts.md)。PDF は `data/raw/<id>/fyYYYY.pdf`。抽出は `python3 scripts/extract_tamabi.py <pdf dir> <output json> <id>`。
