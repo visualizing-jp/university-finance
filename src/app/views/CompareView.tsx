@@ -131,7 +131,9 @@ function CompareLines({
     .domain([minValue - span * 0.08, maxValue + span * 0.08])
     .range([height - pad.bottom, pad.top])
     .nice();
-  const [low, high] = y.domain();
+  const domain = y.domain();
+  const low = domain[0] ?? minValue;
+  const high = domain[1] ?? maxValue;
   if (low > minValue || high < maxValue) {
     y.domain([Math.min(low, minValue - span * 0.08), Math.max(high, maxValue + span * 0.08)]);
   }

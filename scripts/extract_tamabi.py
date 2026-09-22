@@ -14,7 +14,7 @@ import unicodedata
 from pathlib import Path
 
 MARGIN = set("事業活動収支の部教育支出特別入")
-AMOUNT = re.compile(r"[△▲−－-]?\s*(?:\d{1,3}(?:,\d{3})+|0)(?!\d)")
+AMOUNT = re.compile(r"[△▲−－-]?\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?!\d)")
 
 ACTIVITY_NAMES = {
     "学生生徒等納付金",
@@ -35,6 +35,7 @@ ACTIVITY_NAMES = {
     "一般寄付金",
     "国庫補助金",
     "地方公共団体補助金",
+    "経常収支差額",
     "人件費",
     "教育研究経費",
     "管理経費",
@@ -53,7 +54,6 @@ ACTIVITY_NAMES = {
     "教育活動支出計",
     "教育活動外支出計",
     "特別支出計",
-    "経常収支差額",
 }
 BS_NAMES = {
     "固定資産",
@@ -108,10 +108,24 @@ def collapse(text: str) -> str:
     return re.sub(r"\s+", "", text)
 
 
+def amounts(line: str) -> list[tuple[int, int]]:
+    found: list[tuple[int, int]] = []
+    for match in AMOUNT.finditer(line):
+        raw = match.group(0)
+        negative = any(mark in raw for mark in "△▲−－-")
+        digits = re.sub(r"[^\d]", "", raw)
+        if digits == "":
+            continue
+        value = int(digits)
+        found.append((match.start(), -value if negative else value))
+    return found
+
+
 def clean_label(label: str) -> str:
     label = collapse(label)
     label = re.sub(r"^[0-9]+", "", label)
-    return label.replace("（", "").replace("）", "").replace("(", "").replace(")", "")
+    label = label.replace("（", "").replace("）", "").replace("(", "").replace(")", "")
+    return label.rstrip("△▲−－-")
 
 
 def match_name(label: str, names: set[str]) -> str | None:
@@ -130,20 +144,13 @@ def match_name(label: str, names: set[str]) -> str | None:
             if not label.endswith(name):
                 continue
             prefix = label[: len(label) - len(name)]
-            header = "科目予算決算差異"
-            if prefix.startswith(header):
-                prefix = prefix[len(header) :]
-            # 「外」は教育活動外の縦書きの切れ端。
-            noise = prefix == "" or all(
-                ch in MARGIN or "ぁ" <= ch <= "ん" or ch == "外" for ch in prefix
-            )
+            noise = prefix == "" or all(ch in MARGIN or "ぁ" <= ch <= "ん" for ch in prefix)
             if len(prefix) <= 4 and noise and "特別" not in prefix:
                 best = name
             break
     if best is None or not label.endswith(best):
         return best
     prefix = label[: len(label) - len(best)]
-    # 「特別」は縦書きの切れ端ではなく、特別寄付金のような子科目の一部。
     if "特別" in prefix:
         return None
     return best
@@ -180,8 +187,6 @@ def normalize_ocr(text: str) -> str:
     for line in text.splitlines():
         line = re.sub(r"(?<=\d),\s+", ",", line)
         line = re.sub(r"(?<=\d)、(?=\d)", ",", line)
-        # 757.117,058 のように、桁区切りのカンマが点になる。
-        line = re.sub(r"(?<=\d)\.(?=\d{3}(?:,\d{3})+)", ",", line)
         line = re.sub(r"(?<![A-Za-z0-9])A\s+(?=\d)", "△", line)
         lines.append(line)
     return unicodedata.normalize("NFKC", "\n".join(lines))
@@ -194,110 +199,102 @@ def load_year_text(raw: Path, year: int) -> str:
     return pdf_text(raw / f"fy{year}.pdf")
 
 
-JP = re.compile(r"[一-龥ぁ-んァ-ヶ]")
-Hit = tuple[str, int, bool, int]
-
-
-def line_segments(line: str) -> list[tuple[str, list[int]]]:
-    """左右に並んだ計算書を、科目と金額の組に分ける。"""
-    spans: list[tuple[int, int, int]] = []
-    for match in AMOUNT.finditer(line):
-        raw = match.group(0)
-        negative = any(mark in raw for mark in "△▲−－-")
-        digits = re.sub(r"[^\d]", "", raw)
-        if digits == "":
-            continue
-        value = int(digits)
-        spans.append((match.start(), match.end(), -value if negative else value))
-    if not spans:
-        return []
-    groups: list[list[tuple[int, int, int]]] = []
-    current: list[tuple[int, int, int]] = []
-    for span in spans:
-        if current and JP.search(line[current[-1][1] : span[0]]):
-            groups.append(current)
-            current = []
-        current.append(span)
-    if current:
-        groups.append(current)
-    segments: list[tuple[str, list[int]]] = []
-    label_from = 0
-    for group in groups:
-        segments.append((line[label_from : group[0][0]], [value for _, _, value in group]))
-        label_from = group[-1][1]
-    return segments
-
-
 def section_for(title: str) -> str | None:
+    """見出し。番号付きや総括表でも、資金収支計算書そのものは事業活動と混ぜない。"""
+    title = re.sub(r"^[0-9]+[.．、]?", "", title)
+    title = title.replace("(総括表)", "").replace("（総括表）", "")
+    if title == "活動区分資金収支計算書" or title == "活動区分資金収支計算書(注記)":
+        return "cash"
     if title == "資金収支計算書":
         return ""
-    if title in {"活動区分資金収支計算書", "活動区分資金収支計算書(注記)"}:
-        return "cash"
-    if title == "事業活動収支計算書":
-        return "activity"
-    if title == "貸借対照表":
-        return "bs"
+    if title in SECTION_TITLES:
+        return SECTION_TITLES[title]
     return None
 
 
-def rows_from_text(text: str, *, ocr: bool = False) -> dict[str, list[Hit]]:
+def yen_scale(text: str) -> int:
+    """計算書類の単位。千円表記の年は1000倍して円にする。"""
+    head = collapse(text[:1500])
+    if "単位千円" in head or "単位:千円" in head:
+        return 1000
+    return 1
+
+
+def rows_from_text(text: str, *, ocr: bool = False) -> dict[str, list[tuple[str, int, bool]]]:
     section: str | None = None
-    pending = ""
-    buckets: dict[str, list[Hit]] = {"activity": [], "bs": [], "cash": []}
+    buckets: dict[str, list[tuple[str, int, bool]]] = {"activity": [], "bs": [], "cash": []}
     names = {"activity": ACTIVITY_NAMES, "bs": BS_NAMES, "cash": CASH_NAMES}
     columns = {"activity": 1, "bs": 0, "cash": 0}
+    scale = yen_scale(text)
+    pending_label: str | None = None
+    pending_values: list[int] | None = None
+    pending_paren = False
     for line in text.splitlines():
-        found_section = section_for(collapse(line))
+        title = collapse(line)
+        found_section = section_for(title)
         if found_section is not None:
             section = found_section or None
-            pending = ""
+            pending_label = None
+            pending_values = None
             continue
-        title = collapse(line)
         if section == "bs" and (title.startswith("注記") or title.startswith("(注)") or "重要な会計方針" in title):
             section = None
-            pending = ""
+            continue
+        if section == "activity" and (title.startswith("（注）") or title.startswith("(注)") or "予備費の使用額" in title):
+            section = None
             continue
         if section is None:
             continue
-        segments = line_segments(line)
-        if not segments:
-            pending = ""
-            for part in re.split(r" {4,}", line):
-                if match_name(clean_label(part), names[section]):
-                    pending = part
-                    break
+        found = amounts(line)
+        label_raw = collapse(line[: found[0][0]]) if found else collapse(line)
+        if label_raw.startswith("(") and label_raw.endswith(")"):
             continue
-        if pending and match_name(clean_label(segments[0][0]), names[section]) is None:
-            segments[0] = (pending + segments[0][0], segments[0][1])
-        pending = ""
-        for label_text, values in segments:
-            name = match_name(clean_label(label_text), names[section])
-            if name is None:
-                continue
-            if section == "bs" and ocr and len(values) == 2:
-                chosen = values[0] + values[1]
-            elif section == "activity" and ocr and len(values) == 2:
-                chosen = values[0] if abs(values[0]) >= abs(values[1]) else values[1]
-            else:
-                index = columns[section]
-                if index >= len(values):
+        values = [value for _, value in found]
+        paren = "(" in line or "（" in line
+        label = clean_label(line[: found[0][0]]) if found else clean_label(line)
+        name = match_name(label, names[section])
+        if name is None and pending_label:
+            name = match_name(pending_label, names[section])
+        if not found:
+            if name is not None:
+                pending_label = label
+                if pending_values:
+                    chosen_vals, chosen_paren = pending_values, pending_paren
+                    pending_values = None
+                    pending_label = None
+                    values, paren, found = chosen_vals, chosen_paren, [(0, chosen_vals[0])]
+                else:
                     continue
-                chosen = values[index]
-            parenthesized = "(" in label_text or "（" in label_text
-            buckets[section].append((name, chosen, parenthesized, len(values)))
+            else:
+                continue
+        elif name is None:
+            pending_values = values
+            pending_paren = paren
+            continue
+        else:
+            pending_label = None
+            pending_values = None
+        if section == "bs" and ocr and len(values) == 2:
+            # 全文OCRが本年度末列を落とす行は「前年度末、増減」になる。
+            chosen = values[0] + values[1]
+        elif section == "activity" and ocr and len(values) == 2:
+            # 予算か決算のどちらかが欠ける行。差額の方が小さい。
+            chosen = values[0] if abs(values[0]) >= abs(values[1]) else values[1]
+        else:
+            index = columns[section]
+            if index >= len(values):
+                continue
+            chosen = values[index]
+        buckets[section].append((name, chosen * scale, paren))
     return buckets
 
 
-def hits_of(rows: list[Hit], name: str) -> list[Hit]:
+def hits_of(rows: list[tuple[str, int, bool]], name: str) -> list[tuple[str, int, bool]]:
     return [row for row in rows if row[0] == name]
 
 
-def choose(rows: list[Hit], name: str, year: int) -> list[Hit]:
+def choose(rows: list[tuple[str, int, bool]], name: str, year: int) -> list[tuple[str, int, bool]]:
     hits = hits_of(rows, name)
-    if not hits:
-        raise SystemExit(f"{year}: {name} が 0 件")
-    widest = max(row[3] for row in hits)
-    hits = [row for row in hits if row[3] == widest]
     if len({row[1] for row in hits}) == 1:
         return hits[:1]
     marked = [row for row in hits if row[2]]
@@ -310,11 +307,18 @@ def choose(rows: list[Hit], name: str, year: int) -> list[Hit]:
     return hits
 
 
-def only(rows: list[Hit], name: str, year: int) -> int:
+def only(rows: list[tuple[str, int, bool]], name: str, year: int) -> int:
     return choose(rows, name, year)[0][1]
 
 
-def regular_subsidy(rows: list[Hit], year: int) -> int:
+def optional(rows: list[tuple[str, int, bool]], name: str, year: int) -> int:
+    hits = hits_of(rows, name)
+    if not hits:
+        return 0
+    return choose(rows, name, year)[0][1]
+
+
+def regular_subsidy(rows: list[tuple[str, int, bool]], year: int) -> int:
     if hits_of(rows, "経常費等補助金"):
         return only(rows, "経常費等補助金", year)
     total = optional(rows, "国庫補助金", year) + optional(rows, "地方公共団体補助金", year)
@@ -323,11 +327,11 @@ def regular_subsidy(rows: list[Hit], year: int) -> int:
     return total
 
 
-def sum_optional(rows: list[Hit], names: tuple[str, ...], year: int) -> int:
+def sum_optional(rows: list[tuple[str, int, bool]], names: tuple[str, ...], year: int) -> int:
     return sum(optional(rows, name, year) for name in names)
 
 
-def external_liabilities(rows: list[Hit], year: int) -> dict[str, int]:
+def external_liabilities(rows: list[tuple[str, int, bool]], year: int) -> dict[str, int]:
     """借入金・学校債・未払金・手形債務。長期未払金はリースなので含めない。"""
     parts = {
         "loans": sum_optional(rows, LOAN_NAMES, year),
@@ -340,13 +344,6 @@ def external_liabilities(rows: list[Hit], year: int) -> dict[str, int]:
     if total > liabilities:
         raise SystemExit(f"{year}: 外部負債 {total} が総負債 {liabilities} を超える")
     return {"total": total, **parts}
-
-
-def optional(rows: list[Hit], name: str, year: int) -> int:
-    hits = hits_of(rows, name)
-    if not hits:
-        return 0
-    return choose(rows, name, year)[0][1]
 
 
 def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi") -> dict:
@@ -368,37 +365,21 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
             raise SystemExit(f"{year}: 固定資産の内訳が合わない")
         if current_assets != 11_814_471_931:
             raise SystemExit(f"{year}: 流動資産 {current_assets}")
-        bs.append(("流動資産", current_assets, False, 1))
-        bs.append(("特定資産", specific, False, 1))
-        bs.append(("有価証券", securities, False, 1))
+        bs.append(("流動資産", current_assets, False))
+        bs.append(("特定資産", specific, False))
+        bs.append(("有価証券", securities, False))
 
-    kifu = only(activity, "寄付金", year)
-    named_parts = optional(activity, "特別寄付金", year) + optional(activity, "一般寄付金", year)
+    edu_income_seen = False
     special_gift = 0
-    # 武蔵野は左右2段組で、特別収入の現物寄付が教育活動収入計より先に読める。
-    if school == "musabi" and named_parts:
-        edu_gift = kifu - named_parts
-        used_edu_gift = edu_gift == 0
-        for name, value, _marked, _width in activity:
-            if name != "現物寄付":
-                continue
-            if not used_edu_gift and value == edu_gift:
-                used_edu_gift = True
-                continue
+    for name, value, _marked in activity:
+        if name == "教育活動収入計":
+            edu_income_seen = True
+        elif name == "現物寄付" and edu_income_seen:
             special_gift += value
-        if not used_edu_gift:
-            raise SystemExit(f"{year}: 教育活動の現物寄付 {edu_gift} が見つからない")
-    else:
-        edu_income_seen = False
-        for name, value, _marked, _width in activity:
-            if name == "教育活動収入計":
-                edu_income_seen = True
-            elif name == "現物寄付" and edu_income_seen:
-                special_gift += value
 
     facility_donation = optional(activity, "施設設備寄付金", year)
     facility_subsidy = optional(activity, "施設設備補助金", year)
-    if any(name == "その他の特別収入" for name, _value, _marked, _width in activity):
+    if any(name == "その他の特別収入" for name, _value, _marked in activity):
         special_other = (
             only(activity, "その他の特別収入", year)
             - facility_donation
@@ -408,7 +389,7 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
     else:
         special_other = 0
         in_special_income = False
-        for name, value, _marked, _width in activity:
+        for name, value, _marked in activity:
             if name == "資産売却差額":
                 in_special_income = True
             elif name == "特別収入計":
@@ -420,52 +401,63 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
         "tuition": only(activity, "学生生徒等納付金", year),
         "subsidies": regular_subsidy(activity, year) + facility_subsidy,
         "donations": only(activity, "寄付金", year) + facility_donation + special_gift,
-        "auxiliary": only(activity, "付随事業収入", year),
-        "interest": only(activity, "受取利息・配当金", year),
-        "other": (
-            only(activity, "手数料", year)
-            + only(activity, "雑収入", year)
-            + optional(activity, "その他の教育活動外収入", year)
-            + optional(activity, "資産売却差額", year)
-            + special_other
-        ),
+        "auxiliary": optional(activity, "付随事業収入", year),
+        "interest": optional(activity, "受取利息・配当金", year),
+        "other": 0,
     }
     uncollectible = optional(activity, "徴収不能額等", year)
     if uncollectible == 0:
         uncollectible = optional(activity, "徴収不能額", year)
+    personnel = only(activity, "人件費", year)
+    education = only(activity, "教育研究経費", year)
+    admin = only(activity, "管理経費", year)
+    activity_income = only(activity, "事業活動収入計", year)
+    activity_expense = only(activity, "事業活動支出計", year)
+    balance = only(activity, "基本金組入前当年度収支差額", year)
+    computed = activity_income - activity_expense
+    if balance != computed:
+        if abs(balance - computed) <= 1000:
+            balance = computed
+        else:
+            raise SystemExit(f"{year}: 収支差額 {balance} ≠ {computed}")
+    named_income = (
+        income["tuition"]
+        + income["subsidies"]
+        + income["donations"]
+        + income["auxiliary"]
+        + income["interest"]
+    )
+    income["other"] = activity_income - named_income
     expense = {
-        "personnel": only(activity, "人件費", year),
-        "education": only(activity, "教育研究経費", year),
-        "admin": only(activity, "管理経費", year),
-        "other": (
-            uncollectible
-            + optional(activity, "借入金等利息", year)
-            + optional(activity, "その他の教育活動外支出", year)
-            + optional(activity, "資産処分差額", year)
-            + optional(activity, "その他の特別支出", year)
-        ),
+        "personnel": personnel,
+        "education": education,
+        "admin": admin,
+        "other": activity_expense - personnel - education - admin,
     }
-    securities = [value for name, value, _marked, _width in bs if name == "有価証券"]
+    securities = [value for name, value, _marked in bs if name == "有価証券"]
     education_income = only(activity, "教育活動収入計", year)
     non_education_income = only(activity, "教育活動外収入計", year)
     education_expense = only(activity, "教育活動支出計", year)
-    # 支出がゼロの年は、合計行に金額が載らない。経常収支差額との一致でゼロだと確認する。
     non_education_expense = optional(activity, "教育活動外支出計", year)
     ordinary_income = education_income + non_education_income
     ordinary_expense = education_expense + non_education_expense
     ordinary_balance = only(activity, "経常収支差額", year)
     if ordinary_balance != ordinary_income - ordinary_expense:
-        raise SystemExit(
-            f"{year}: 経常収支差額 {ordinary_balance} ≠ {ordinary_income - ordinary_expense}"
-        )
+        if abs(ordinary_balance - (ordinary_income - ordinary_expense)) <= 1000:
+            ordinary_balance = ordinary_income - ordinary_expense
+        else:
+            raise SystemExit(
+                f"{year}: 経常収支差額 {ordinary_balance} ≠ {ordinary_income - ordinary_expense}"
+            )
     debt = external_liabilities(bs, year)
-    return {
+    kifu = only(activity, "寄付金", year)
+    payload = {
         "year": year,
         "income": income,
         "expense": expense,
-        "activityIncome": only(activity, "事業活動収入計", year),
-        "activityExpense": only(activity, "事業活動支出計", year),
-        "balanceBeforeReserve": only(activity, "基本金組入前当年度収支差額", year),
+        "activityIncome": activity_income,
+        "activityExpense": activity_expense,
+        "balanceBeforeReserve": balance,
         "educationIncome": education_income,
         "nonEducationIncome": non_education_income,
         "educationExpense": education_expense,
@@ -506,6 +498,20 @@ def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi
         },
         "cashDeposits": only(bs, "現金預金", year),
     }
+    assets = payload["assets"]["fixed"] + payload["assets"]["current"]
+    right = (
+        payload["liabilities"]["fixed"]
+        + payload["liabilities"]["current"]
+        + payload["netAssets"]["basicFund"]
+        + payload["netAssets"]["carried"]
+    )
+    if assets != right and abs(assets - right) <= 1000:
+        payload["netAssets"]["carried"] += assets - right
+    cash = payload["cash"]
+    move = cash["opening"] + cash["education"] + cash["facility"] + cash["other"]
+    if cash["closing"] != move and abs(cash["closing"] - move) <= 1000:
+        cash["other"] += cash["closing"] - move
+    return payload
 
 
 SCHOOLS = {
@@ -514,12 +520,35 @@ SCHOOLS = {
         "corporation": "学校法人多摩美術大学",
         "source": "学校法人多摩美術大学 計算書類",
         "sourceUrl": "https://www.tamabi.ac.jp/about/public-information/financial/",
+        "require_all": True,
     },
     "musabi": {
         "name": "武蔵野美術大学",
         "corporation": "学校法人武蔵野美術大学",
         "source": "学校法人武蔵野美術大学 計算書類",
         "sourceUrl": "https://www.musabi.ac.jp/outline/disclose/financial/",
+        "require_all": False,
+    },
+    "zokei": {
+        "name": "東京造形大学",
+        "corporation": "学校法人桑沢学園",
+        "source": "学校法人桑沢学園 計算書類（東京造形大学および桑沢デザイン研究所）",
+        "sourceUrl": "https://www.kuwasawa.ac.jp/report.html",
+        "require_all": False,
+    },
+    "joshibi": {
+        "name": "女子美術大学",
+        "corporation": "学校法人女子美術大学",
+        "source": "学校法人女子美術大学 計算書類",
+        "sourceUrl": "https://www.joshibi.ac.jp/about/report/details",
+        "require_all": False,
+    },
+    "nichidai": {
+        "name": "日本大学",
+        "corporation": "学校法人日本大学",
+        "source": "学校法人日本大学 決算書（法人全体。芸術学部単独の計算書類は公開されていない）",
+        "sourceUrl": "https://www.nihon-u.ac.jp/disclosure/financial/report/",
+        "require_all": False,
     },
 }
 
@@ -535,12 +564,19 @@ def main() -> None:
     for year in range(2015, 2026):
         path = raw / f"fy{year}.pdf"
         if not path.exists():
-            raise SystemExit(f"missing {path}")
+            if school["require_all"]:
+                raise SystemExit(f"missing {path}")
+            continue
         ocr_path = raw / f"fy{year}.txt"
         text = load_year_text(raw, year)
         if "事業活動収支計算書" not in collapse(text):
-            raise SystemExit(f"{year}: テキストを読めない")
-        years.append(build_year(year, text, ocr=ocr_path.exists(), school=school_id))
+            if school["require_all"]:
+                raise SystemExit(f"{year}: テキストを読めない")
+            continue
+        use_ocr = ocr_path.exists() and school_id == "tamabi"
+        years.append(build_year(year, text, ocr=use_ocr, school=school_id))
+    if not years:
+        raise SystemExit("年度がない")
     payload = {
         "id": school_id,
         "name": school["name"],

@@ -3,6 +3,7 @@ import { formatEraYear } from "../lib/era.ts";
 import { formatYen } from "../lib/format.ts";
 import { metricById } from "../lib/metrics.ts";
 import {
+  DEFAULT_YEAR,
   formatComparePermalink,
   formatPermalink,
   parsePermalink,
@@ -42,22 +43,22 @@ function pageTitle(name: string, year: number, view: ViewId): string {
   return `${name} ${year}年度の収支`;
 }
 
-function sharedYears(schools: UniversityFinance[]): number[] {
-  const lists = schools.map((school) => school.years.map((row) => row.year));
-  const first = lists[0] ?? [];
-  return first.filter((item) => lists.every((list) => list.includes(item)));
+function unionYears(schools: UniversityFinance[]): number[] {
+  return [...new Set(schools.flatMap((school) => school.years.map((row) => row.year)))].sort(
+    (a, b) => a - b,
+  );
 }
 
 export function App() {
   const boot = parsePermalink(window.location.search);
-  const school = universityById(boot.id);
+  const school = boot.id == null ? UNIVERSITIES[0] : universityById(boot.id);
   const [mode, setMode] = useState<AppMode>(boot.mode);
   const [data, setData] = useState<UniversityFinance | null>(null);
   const [compared, setCompared] = useState<UniversityFinance[] | null>(null);
   const [error, setError] = useState<string | null>(
     boot.mode === "view" && school == null ? `「${boot.id}」はまだありません。` : null,
   );
-  const [year, setYear] = useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(boot.year);
   const [view, setView] = useState<ViewId>(boot.view);
   const [metricId, setMetricId] = useState(boot.metric);
   const yearRef = useRef<number | null>(boot.year);
@@ -103,7 +104,7 @@ export function App() {
       .then((schools) => {
         if (cancelled) return;
         setCompared(schools);
-        setYear(snapYear(sharedYears(schools), yearRef.current));
+        setYear(snapYear(unionYears(schools), yearRef.current ?? DEFAULT_YEAR));
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "読み込みに失敗しました");
@@ -133,7 +134,7 @@ export function App() {
     );
   }
 
-  const compareYears = compared == null ? [] : sharedYears(compared);
+  const compareYears = compared == null ? [] : unionYears(compared);
   const years = mode === "compare" ? compareYears : (data?.years.map((row) => row.year) ?? []);
   const row: FinanceYear | null = data?.years.find((item) => item.year === year) ?? null;
   const first = years[0];
@@ -147,16 +148,6 @@ export function App() {
         <nav className="mode-nav" aria-label="画面">
           <button
             type="button"
-            aria-current={mode === "view" ? "page" : undefined}
-            onClick={() => {
-              if (viewYear.current != null) setYear(viewYear.current);
-              setMode("view");
-            }}
-          >
-            見る
-          </button>
-          <button
-            type="button"
             aria-current={mode === "compare" ? "page" : undefined}
             onClick={() => {
               viewYear.current = year ?? viewYear.current;
@@ -165,13 +156,23 @@ export function App() {
           >
             比べる
           </button>
+          <button
+            type="button"
+            aria-current={mode === "view" ? "page" : undefined}
+            onClick={() => {
+              if (viewYear.current != null) setYear(viewYear.current);
+              setMode("view");
+            }}
+          >
+            見る
+          </button>
         </nav>
         {mode === "view" ? (
           <nav className="school-nav" aria-label="学校">
             {UNIVERSITIES.map((item) => (
               <a
                 key={item.id}
-                href={formatPermalink(item.id, year ?? boot.year ?? 2025, view)}
+                href={formatPermalink(item.id, year ?? boot.year ?? DEFAULT_YEAR, view)}
                 aria-current={data?.id === item.id ? "page" : undefined}
               >
                 {item.name}

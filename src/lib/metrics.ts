@@ -14,7 +14,9 @@ export interface Metric {
 }
 
 function ratio(numerator: number, denominator: number): number | null {
-  if (denominator === 0) return null;
+  if (!Number.isFinite(numerator) || !Number.isFinite(denominator) || denominator === 0) {
+    return null;
+  }
   return numerator / denominator;
 }
 
@@ -123,8 +125,8 @@ export const METRICS: Metric[] = [
 
 export const DEFAULT_METRIC_ID = "educationRatio";
 
-/** 多摩美は朱、武蔵野は緑。3校目以降は墨。 */
-const SCHOOL_COLORS = ["#c51b7d", "#4d9221", "#2c3338"] as const;
+/** 多摩美は朱、武蔵野は緑、以降は別色。 */
+const SCHOOL_COLORS = ["#c51b7d", "#4d9221", "#8e0152", "#2166ac", "#2c3338"] as const;
 
 export function schoolColor(index: number): string {
   return SCHOOL_COLORS[index] ?? SCHOOL_COLORS[SCHOOL_COLORS.length - 1] ?? "#2c3338";
