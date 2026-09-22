@@ -147,7 +147,7 @@ export function App() {
   return (
     <div className="page">
       <header className="masthead">
-        <p className="eyebrow">学校法人の計算書類</p>
+        <p className="eyebrow">美術系大学の財務</p>
         <nav className="mode-nav" aria-label="画面">
           <button
             type="button"
