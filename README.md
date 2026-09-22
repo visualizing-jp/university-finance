@@ -18,6 +18,8 @@ npm run verify
 npm run dev
 ```
 
+公開サイト https://university-finance.visualizing.jp/ は、`main` への push で Vite の `dist` を GitHub Pages に出す。ソースの `index.html` をそのまま置いても TypeScript は動かない。
+
 ルート（`/`）は比較ページへ置き換える。
 
 ```
