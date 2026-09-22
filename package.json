@@ -12,6 +12,8 @@
     "data": "python3 scripts/extract_tamabi.py",
     "verify": "node --experimental-strip-types --no-warnings scripts/verify.ts",
     "dev": "vite",
+    "predev": "cp index.vite.html index.html",
+    "prebuild": "cp index.vite.html index.html",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.app.json"
