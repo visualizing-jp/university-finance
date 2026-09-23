@@ -7,11 +7,13 @@ import {
   DEFAULT_YEAR,
   formatComparePermalink,
   formatPermalink,
+  formatStructurePermalink,
   parsePermalink,
   snapYear,
   type AppMode,
   type ViewId,
 } from "../lib/permalink.ts";
+import { structureMetricById } from "../lib/structure.ts";
 import {
   UNIVERSITIES,
   universityById,
@@ -23,6 +25,7 @@ import { BalanceView } from "./views/BalanceView.tsx";
 import { CashView } from "./views/CashView.tsx";
 import { CompareView } from "./views/CompareView.tsx";
 import { IncomeView } from "./views/IncomeView.tsx";
+import { StructureView } from "./views/StructureView.tsx";
 import { TrendView } from "./views/TrendView.tsx";
 
 function applyPermalink(id: string, year: number, view: ViewId): void {
@@ -35,6 +38,12 @@ function applyComparePermalink(year: number, metric: string): void {
   const next = formatComparePermalink(year, metric);
   if (window.location.search === next) return;
   window.history.replaceState({ mode: "compare", year, metric }, "", `${window.location.pathname}${next}`);
+}
+
+function applyStructurePermalink(year: number, metric: string): void {
+  const next = formatStructurePermalink(year, metric);
+  if (window.location.search === next) return;
+  window.history.replaceState({ mode: "structure", year, metric }, "", `${window.location.pathname}${next}`);
 }
 
 function pageTitle(name: string, year: number, view: ViewId): string {
@@ -65,6 +74,7 @@ export function App() {
   const yearRef = useRef<number | null>(boot.year);
   const viewYear = useRef<number | null>(boot.year);
   const metric = metricById(metricId);
+  const structureMetric = structureMetricById(metricId);
 
   useEffect(() => {
     if (year != null) yearRef.current = year;
@@ -92,7 +102,7 @@ export function App() {
   }, [mode, school]);
 
   useEffect(() => {
-    if (mode !== "compare") return;
+    if (mode === "view") return;
     let cancelled = false;
     Promise.all(
       UNIVERSITIES.map((item) =>
@@ -123,11 +133,17 @@ export function App() {
       trackPage();
       return;
     }
+    if (mode === "structure") {
+      applyStructurePermalink(year, structureMetric.id);
+      document.title = `経営構造を見る ${year}年度の${structureMetric.name}`;
+      trackPage();
+      return;
+    }
     if (data == null) return;
     applyPermalink(data.id, year, view);
     document.title = pageTitle(data.name, year, view);
     trackPage();
-  }, [mode, year, view, data, metric]);
+  }, [mode, year, view, data, metric, structureMetric]);
 
   if (mode === "view" && error && data == null) {
     return (
@@ -138,11 +154,12 @@ export function App() {
   }
 
   const compareYears = compared == null ? [] : unionYears(compared);
-  const years = mode === "compare" ? compareYears : (data?.years.map((row) => row.year) ?? []);
+  const roster = mode === "compare" || mode === "structure";
+  const years = roster ? compareYears : (data?.years.map((row) => row.year) ?? []);
   const row: FinanceYear | null = data?.years.find((item) => item.year === year) ?? null;
   const first = years[0];
   const last = years[years.length - 1];
-  const compareReady = mode === "compare" && compared != null && year != null;
+  const rosterReady = roster && compared != null && year != null;
 
   return (
     <div className="page">
@@ -151,23 +168,33 @@ export function App() {
         <nav className="mode-nav" aria-label="画面">
           <button
             type="button"
-            aria-current={mode === "compare" ? "page" : undefined}
-            onClick={() => {
-              viewYear.current = year ?? viewYear.current;
-              setMode("compare");
-            }}
-          >
-            比べる
-          </button>
-          <button
-            type="button"
             aria-current={mode === "view" ? "page" : undefined}
             onClick={() => {
               if (viewYear.current != null) setYear(viewYear.current);
               setMode("view");
             }}
           >
-            見る
+            大学別
+          </button>
+          <button
+            type="button"
+            aria-current={mode === "compare" ? "page" : undefined}
+            onClick={() => {
+              viewYear.current = year ?? viewYear.current;
+              setMode("compare");
+            }}
+          >
+            大学比較
+          </button>
+          <button
+            type="button"
+            aria-current={mode === "structure" ? "page" : undefined}
+            onClick={() => {
+              viewYear.current = year ?? viewYear.current;
+              setMode("structure");
+            }}
+          >
+            経営構造
           </button>
         </nav>
         {mode === "view" ? (
@@ -185,41 +212,55 @@ export function App() {
         ) : null}
         <div className="masthead__row">
           <h1>
-            {mode === "compare" ? "私立の美術芸術大学を比べる" : (data?.name ?? school?.name ?? "学校法人")}
+            {mode === "compare"
+              ? "私立の美術芸術大学を比べる"
+              : mode === "structure"
+                ? "経営構造を見る"
+                : (data?.name ?? school?.name ?? "学校法人")}
             {mode === "view" ? <span className="sep">の経営状況</span> : null}
           </h1>
           {mode === "view" ? <ViewNav view={view} onView={setView} /> : null}
         </div>
       </header>
       <p className="lede">
-        {mode === "compare"
+        {mode === "structure"
           ? year == null
-            ? "1つの比率で、計算書類がある大学を並べる。"
-            : `${year}年度。1つの比率で並べる。横棒はその年度、折れ線は${first ?? 2015}年度以降。`
-          : lede(view, row, first, last)}
+            ? "フローとストックの位置、収入と支出の構成、6つの指標を並べる。"
+            : `${year}年度。位置、構成、6つの指標。指標を選ぶと${first ?? 2015}年度以降の推移が出る。`
+          : mode === "compare"
+            ? year == null
+              ? "1つの比率で、計算書類がある大学を並べる。"
+              : `${year}年度。1つの比率で並べる。横棒はその年度、折れ線は${first ?? 2015}年度以降。`
+            : lede(view, row, first, last)}
       </p>
-      {error && mode === "compare" ? <p className="status">{error}</p> : null}
-      {mode === "compare" ? (
-        compareReady && compared != null ? (
+      {error && roster ? <p className="status">{error}</p> : null}
+      {roster ? (
+        rosterReady && compared != null && year != null ? (
           <>
-            <CompareView
-              schools={compared}
-              years={compareYears}
-              year={year}
-              metric={metric}
-              onYear={setYear}
-              onMetric={setMetricId}
-            />
+            {mode === "structure" ? (
+              <StructureView
+                schools={compared}
+                years={compareYears}
+                year={year}
+                metricId={structureMetric.id}
+                onYear={setYear}
+                onMetric={setMetricId}
+              />
+            ) : (
+              <CompareView
+                schools={compared}
+                years={compareYears}
+                year={year}
+                metric={metric}
+                onYear={setYear}
+                onMetric={setMetricId}
+              />
+            )}
             <footer className="source">
-              出典:{" "}
-              {compared.map((item, index) => (
-                <span key={item.id}>
-                  {index > 0 ? "、" : null}
-                  {item.corporation}「{item.source.replace(`${item.corporation} `, "")}」（
-                  <a href={item.sourceUrl}>{item.sourceUrl}</a>）
-                </span>
-              ))}
-              。比率はパーセント（小数1桁）、運用資産余裕比率は年。2014年度以前の消費収支計算書は含まない。
+              <Sources schools={compared} />
+              {mode === "structure"
+                ? "。教育活動収支差額比率、学生納付金依存度、人件費比率、運用収益依存度、純資産比率はパーセント（小数1桁）。手元流動性はか月。収入のその他は手数料を含む。2014年度以前の消費収支計算書は含まない。"
+                : "。比率はパーセント（小数1桁）、運用資産余裕比率は年。2014年度以前の消費収支計算書は含まない。"}
             </footer>
           </>
         ) : error ? null : (
@@ -241,6 +282,21 @@ export function App() {
         <p className="status">読み込み中</p>
       )}
     </div>
+  );
+}
+
+function Sources({ schools }: { schools: UniversityFinance[] }) {
+  return (
+    <>
+      出典:{" "}
+      {schools.map((item, index) => (
+        <span key={item.id}>
+          {index > 0 ? "、" : null}
+          {item.corporation}「{item.source.replace(`${item.corporation} `, "")}」（
+          <a href={item.sourceUrl}>{item.sourceUrl}</a>）
+        </span>
+      ))}
+    </>
   );
 }
 

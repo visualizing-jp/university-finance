@@ -34,6 +34,15 @@ export function formatMetric(value: number, unit: "percent" | "year"): string {
   return `${sign}${(abs * 100).toFixed(1)}%`;
 }
 
+/** 経営構造の比率と、手元流動性（か月）。負は△。 */
+export function formatStructure(value: number, unit: "percent" | "month"): string {
+  if (unit === "month") {
+    const sign = value < 0 ? "△" : "";
+    return `${sign}${Math.abs(value).toFixed(1)}か月`;
+  }
+  return formatMetric(value, "percent");
+}
+
 export function formatShare(value: number, total: number): string {
   if (total <= 0) return "—";
   return `${((Math.abs(value) / total) * 100).toFixed(1)}%`;

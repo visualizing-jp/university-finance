@@ -1,9 +1,10 @@
 import { DEFAULT_METRIC_ID } from "./metrics.ts";
+import { DEFAULT_STRUCTURE_METRIC_ID } from "./structure.ts";
 
 export const VIEW_IDS = ["income", "balance", "cash", "trend"] as const;
 export type ViewId = (typeof VIEW_IDS)[number];
 export const DEFAULT_VIEW: ViewId = "income";
-export type AppMode = "view" | "compare";
+export type AppMode = "view" | "compare" | "structure";
 export const DEFAULT_YEAR = 2025;
 
 const VIEW_QUERY: Record<string, ViewId> = {
@@ -32,21 +33,39 @@ export function parsePermalink(search: string): PermalinkQuery {
   const idRaw = q.get("id");
   const yearRaw = q.get("year");
   const id = idRaw != null && idRaw.trim() !== "" ? idRaw.trim() : null;
-  const mode: AppMode = empty || q.get("mode") === "compare" ? "compare" : "view";
+  const modeParam = q.get("mode");
+  const mode: AppMode =
+    modeParam === "structure" ? "structure" : empty || modeParam === "compare" ? "compare" : "view";
   const year =
     yearRaw != null && /^\d{4}$/.test(yearRaw)
       ? Number(yearRaw)
-      : mode === "compare"
-        ? DEFAULT_YEAR
-        : null;
+      : mode === "view"
+        ? null
+        : DEFAULT_YEAR;
   const metricRaw = q.get("metric");
   return {
     id,
     year,
     view: parseView(q.get("view")),
     mode,
-    metric: metricRaw != null && metricRaw.trim() !== "" ? metricRaw.trim() : DEFAULT_METRIC_ID,
+    metric:
+      metricRaw != null && metricRaw.trim() !== ""
+        ? metricRaw.trim()
+        : mode === "structure"
+          ? DEFAULT_STRUCTURE_METRIC_ID
+          : DEFAULT_METRIC_ID,
   };
+}
+
+export function formatStructurePermalink(
+  year: number,
+  metric: string = DEFAULT_STRUCTURE_METRIC_ID,
+): string {
+  const q = new URLSearchParams();
+  q.set("mode", "structure");
+  q.set("year", String(year));
+  if (metric !== DEFAULT_STRUCTURE_METRIC_ID) q.set("metric", metric);
+  return `?${q.toString()}`;
 }
 
 export function formatComparePermalink(year: number, metric: string = DEFAULT_METRIC_ID): string {
