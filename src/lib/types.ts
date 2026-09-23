@@ -78,7 +78,6 @@ export const UNIVERSITIES = [
   { id: "musabi", file: "musabi.json", name: "武蔵野美術大学" },
   { id: "zokei", file: "zokei.json", name: "東京造形大学" },
   { id: "joshibi", file: "joshibi.json", name: "女子美術大学" },
-  { id: "nichidai", file: "nichidai.json", name: "日本大学" },
 ] as const;
 
 export type UniversityId = (typeof UNIVERSITIES)[number]["id"];

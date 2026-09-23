@@ -34,7 +34,7 @@ python3 scripts/extract_tamabi.py data/raw/joshibi public/data/joshibi.json josh
 - 公開: https://www.nihon-u.ac.jp/disclosure/financial/report/
 - 使うファイル: 各年度の「決算書」（事業報告書ではない）
 - 取得できた年度: 2019–2025。2024年度PDFはCIDフォントでテキストが抜け、OCR待ち
-- 法人全体の規模は美術大学単体と並べられない。画面の名前は「日本大学」とし、芸術学部単独とは書かない
+- 法人全体の規模は美術大学単体と並べられない。画面の描画対象には入れない。JSONは `public/data/nichidai.json` に残す
 
 ```
 python3 scripts/extract_tamabi.py data/raw/nichigei public/data/nichidai.json nichidai

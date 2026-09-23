@@ -8,7 +8,7 @@
 - 経年変化: 収入・支出・ストック・収支差額の折れ線
 - 比べる: 経常収入などを分母にした比率を、1指標ずつ横棒と折れ線で並べる
 
-いま JSON があるのは多摩美術大学、武蔵野美術大学、東京造形大学、女子美術大学、日本大学（法人全体）。出典は [`docs/sources.md`](docs/sources.md)。
+画面に出すのは多摩美術大学、武蔵野美術大学、東京造形大学、女子美術大学。日本大学のJSONは法人全体のため描画対象に入れていない。出典は [`docs/sources.md`](docs/sources.md)。
 
 ## 開発
 
@@ -28,7 +28,6 @@ npm run dev
 /?id=musabi&year=2025
 /?id=zokei&year=2025
 /?id=joshibi&year=2025
-/?id=nichidai&year=2025
 ```
 
 比較の既定指標 `educationRatio` と、個別大学の既定 `view=income` は URL から省く。
