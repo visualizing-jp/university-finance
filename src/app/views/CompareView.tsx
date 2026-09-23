@@ -25,9 +25,14 @@ export function CompareView({ schools, years, year, metric, onYear, onMetric }: 
 
   return (
     <>
-      <label className="compare-metric">
-        <span>指標</span>
-        <select value={metric.id} onChange={(event) => onMetric(event.target.value)}>
+      <div className="compare-metric">
+        <label htmlFor="compare-metric">指標</label>
+        <select
+          id="compare-metric"
+          aria-describedby="compare-metric-definition"
+          value={metric.id}
+          onChange={(event) => onMetric(event.target.value)}
+        >
           {metricGroups().map((group) => (
             <optgroup key={group.group} label={group.group}>
               {group.metrics.map((item) => (
@@ -38,11 +43,13 @@ export function CompareView({ schools, years, year, metric, onYear, onMetric }: 
             </optgroup>
           ))}
         </select>
-      </label>
+        <p id="compare-metric-definition" className="compare-definition">
+          {metric.definition}
+        </p>
+      </div>
       <YearSlider years={years} year={year} onYear={onYear} />
       <CompareBars metric={metric} rows={rows} />
       <CompareLines metric={metric} schools={schools} years={years} year={year} />
-      <p className="compare-definition">{metric.definition}</p>
     </>
   );
 }

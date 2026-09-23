@@ -119,7 +119,7 @@ export function App() {
     if (year == null) return;
     if (mode === "compare") {
       applyComparePermalink(year, metric.id);
-      document.title = `私立美術・芸術大学を比べる ${year}年度の${metric.name}`;
+      document.title = `私立の美術芸術大学を比べる ${year}年度の${metric.name}`;
       trackPage();
       return;
     }
@@ -185,7 +185,7 @@ export function App() {
         ) : null}
         <div className="masthead__row">
           <h1>
-            {mode === "compare" ? "私立美術・芸術大学を比べる" : (data?.name ?? school?.name ?? "学校法人")}
+            {mode === "compare" ? "私立の美術芸術大学を比べる" : (data?.name ?? school?.name ?? "学校法人")}
             {mode === "view" ? <span className="sep">の経営状況</span> : null}
           </h1>
           {mode === "view" ? <ViewNav view={view} onView={setView} /> : null}
