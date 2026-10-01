@@ -92,6 +92,7 @@ export const UNIVERSITIES: ReadonlyArray<{
   { id: "joshibi", file: "joshibi.json", name: "女子美術大学", region: "kanto" },
   { id: "seika", file: "seika.json", name: "京都精華大学", region: "kansai" },
   { id: "seian", file: "seian.json", name: "成安造形大学", region: "kansai" },
+  { id: "saga", file: "saga.json", name: "嵯峨美術大学", region: "kansai" },
 ];
 
 /** どの地域にも大学があるときだけ、地域で絞るスイッチを出す。 */

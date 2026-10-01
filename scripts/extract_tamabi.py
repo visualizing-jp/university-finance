@@ -13,7 +13,7 @@ import sys
 import unicodedata
 from pathlib import Path
 
-MARGIN = set("事業活動収支の部教育支出特別入")
+MARGIN = set("事業活動収支の部教育支出特別入資金")
 AMOUNT = re.compile(r"[△▲−－-]?\s*(?:\d{1,3}(?:,\d{3})+|\d+)(?!\d)")
 
 ACTIVITY_NAMES = {
@@ -185,10 +185,24 @@ def normalize_ocr(text: str) -> str:
         .replace("文出", "支出")
         .replace("徵", "徴")
         .replace("羞額", "差額")
+        .replace("雜", "雑")
+        .replace("賛産", "資産")
+        .replace("貸産", "資産")
+        .replace("劵", "券")
+        .replace("賲金", "資金")
     )
     lines: list[str] = []
     for line in text.splitlines():
+        # 字間の広い表題は1〜2字を読み違える。貸借対照表の表題は形が残らないので「資産の部」で始める。
+        key = collapse(line)
+        if re.fullmatch(r"\S?動区分\S{2}収支計算書", key):
+            line = "活動区分資金収支計算書"
+        elif re.fullmatch(r"事\S活動収支計算書", key):
+            line = "事業活動収支計算書"
+        elif key == "資産の部":
+            lines.append("貸借対照表")
         line = re.sub(r"(?<=\d),\s+", ",", line)
+        line = re.sub(r"(?<=\d)\.\s*(?=\d{3}(?!\d))", ",", line)
         line = re.sub(r"(?<=\d)、(?=\d)", ",", line)
         line = re.sub(r"(?<![A-Za-z0-9])A\s+(?=\d)", "△", line)
         lines.append(line)
@@ -365,9 +379,10 @@ def build_year(
     bs = buckets["bs"]
     if bs_text is not None:
         bs = rows_from_text(bs_text, bs_column=1)["bs"]
-        summary = only(buckets["bs"], "資産の部合計", year)
-        if only(bs, "資産の部合計", year) != summary:
-            raise SystemExit(f"{year}: 前年度末列の資産合計が当年度の総括表 {summary} と違う")
+        if hits_of(buckets["bs"], "資産の部合計"):
+            summary = only(buckets["bs"], "資産の部合計", year)
+            if only(bs, "資産の部合計", year) != summary:
+                raise SystemExit(f"{year}: 前年度末列の資産合計が当年度の総括表 {summary} と違う")
     cash = buckets["cash"]
     if year == 2024 and school == "tamabi":
         # 資産の部の本年度末は全文OCRが落とす。金額列の切り出しと、前年度末+増減が
@@ -577,6 +592,23 @@ SCHOOLS = {
         "sourceUrl": "https://www.seian.ac.jp/about/public_info/",
         "require_all": True,
     },
+    "saga": {
+        "name": "嵯峨美術大学",
+        "corporation": "学校法人大覚寺学園",
+        "source": "学校法人大覚寺学園 計算書類（嵯峨美術大学および嵯峨美術短期大学。2020年度の貸借対照表は2021年度計算書類の前年度末）",
+        "sourceUrl": "https://www.kyoto-saga.ac.jp/about/info/",
+        "require_all": False,
+        # 2020年度の貸借対照表はどの版にも残っていない。
+        "bs_from_next_year": {2020},
+        # 太字行のOCR誤読。正しい値は内訳行（テキスト層）の合計と事業報告書の千円表で確かめた。
+        "ocr_fixes": {
+            2023: [
+                (r"(人件費\s+[\d,]+\s+)8061,679,375", r"\g<1>861,679,375"),
+                (r"(流動資産\s+)916:069 °OLG 1L", r"\g<1>1,570,690,916"),
+            ],
+            2024: [(r"(\n\s*繰越収支差額\s+)2,903,394,700", r"\g<1>△2,903,394,700")],
+        },
+    },
     "nichidai": {
         "name": "日本大学",
         "corporation": "学校法人日本大学",
@@ -603,6 +635,10 @@ def main() -> None:
             continue
         ocr_path = raw / f"fy{year}.txt"
         text = load_year_text(raw, year)
+        for pattern, fixed in school.get("ocr_fixes", {}).get(year, []):
+            text, count = re.subn(pattern, fixed, text)
+            if count != 1:
+                raise SystemExit(f"{year}: OCR訂正 {pattern} が {count} 件")
         if "事業活動収支計算書" not in collapse(text):
             if school["require_all"]:
                 raise SystemExit(f"{year}: テキストを読めない")

@@ -31,7 +31,14 @@ function TrendChart({ group, rows }: { group: TrendGroup; rows: FinanceYear[] })
   const width = ready ? size.width : 640;
   const height = 240;
   const pad = { top: 12, right: 8, bottom: 28, left: 72 };
-  const years = rows.map((row) => row.year);
+  const first = rows[0]?.year;
+  const last = rows[rows.length - 1]?.year;
+  /** 公開されていない年度も軸に残し、線をそこで切る。 */
+  const years =
+    first == null || last == null
+      ? []
+      : Array.from({ length: last - first + 1 }, (_, index) => first + index);
+  const points = years.map((year) => rows.find((row) => row.year === year) ?? null);
   const values = group.series.flatMap((series) => rows.map((row) => series.value(row)));
   const minValue = Math.min(0, ...values);
   const maxValue = Math.max(...values, 1);
@@ -44,7 +51,7 @@ function TrendChart({ group, rows }: { group: TrendGroup; rows: FinanceYear[] })
     .range([height - pad.bottom, pad.top])
     .nice();
   const ticks = y.ticks(4);
-  const hoverRow = hover == null ? null : rows[hover];
+  const hoverRow = hover == null ? null : (points[hover] ?? null);
   const yearAt = (clientX: number): number | null => {
     const box = ref.current?.getBoundingClientRect();
     if (box == null || years.length === 0) return null;
@@ -104,9 +111,10 @@ function TrendChart({ group, rows }: { group: TrendGroup; rows: FinanceYear[] })
               key={series.key}
               className="trend-line"
               d={
-                d3Line<FinanceYear>()
-                  .x((row) => x(row.year) ?? 0)
-                  .y((row) => y(series.value(row)))(rows) ?? ""
+                d3Line<FinanceYear | null>()
+                  .defined((row) => row != null)
+                  .x((row) => x(row?.year ?? 0) ?? 0)
+                  .y((row) => (row == null ? 0 : y(series.value(row))))(points) ?? ""
               }
               fill="none"
               stroke={series.color}

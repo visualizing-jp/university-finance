@@ -125,6 +125,7 @@ const SHORT_NAMES: Record<string, string> = {
   joshibi: "女子美",
   seika: "京都精華",
   seian: "成安造形",
+  saga: "嵯峨美",
 };
 
 export function shortName(id: string, fallback: string): string {

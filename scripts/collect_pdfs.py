@@ -64,6 +64,39 @@ SEIKA = {
     ],
 }
 
+# 嵯峨美術大学は最新年度だけを公式サイトに置き、事業活動収支・活動区分資金収支・貸借対照表を
+# 同じURLで毎年差し替えてきた。過去年度は Internet Archive の版で分ける。
+# 2020年度の貸借対照表と2022年度の3表は、どの版にも残っていない。
+SAGA_INFO = "https://www.kyoto-saga.ac.jp/pdf/about/info/"
+
+
+def saga_archived(*pieces: tuple[str, str]) -> list[str]:
+    return [f"https://web.archive.org/web/{stamp}id_/{SAGA_INFO}{name}" for stamp, name in pieces]
+
+
+SAGA = {
+    2025: [SAGA_INFO + "R7_FinancialStatements.pdf"],
+    2024: saga_archived(
+        ("20250701021244", "zaimu-jigyo.pdf"),
+        ("20250701030639", "zaimu-katudoukubun.pdf"),
+        ("20250701030731", "zaimu-taisyaku.pdf"),
+    ),
+    2023: saga_archived(
+        ("20250520091409", "about_info_jigyo.pdf"),
+        ("20250520093208", "about_info_katudoukubun.pdf"),
+        ("20250520090856", "about_info_taisyaku.pdf"),
+    ),
+    2021: saga_archived(
+        ("20230123155924", "about_info_jigyo.pdf"),
+        ("20230123155925", "about_info_katudoukubun.pdf"),
+        ("20230123155926", "about_info_taisyaku.pdf"),
+    ),
+    2020: saga_archived(
+        ("20211026202101", "about_info_jigyo.pdf"),
+        ("20211022030014", "about_info_katudoukubun.pdf"),
+    ),
+}
+
 
 def fetch(url: str, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -113,6 +146,9 @@ def main() -> None:
     if want("seika"):
         for year, urls in SEIKA.items():
             fetch_joined(urls, ROOT / "seika" / f"fy{year}.pdf")
+    if want("saga"):
+        for year, urls in SAGA.items():
+            fetch_joined(urls, ROOT / "saga" / f"fy{year}.pdf")
 
 
 if __name__ == "__main__":

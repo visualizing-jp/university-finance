@@ -41,6 +41,28 @@ python3 scripts/collect_pdfs.py seika
 python3 scripts/extract_tamabi.py data/raw/seika public/data/seika.json seika
 ```
 
+## 嵯峨美術大学（学校法人大覚寺学園）
+
+- 公開: https://www.kyoto-saga.ac.jp/about/info/
+- 使うファイル: 2025年度は「計算書類等」PDF。2024年度以前は事業活動収支計算書・活動区分資金収支計算書・貸借対照表の個別PDFを、Internet Archive の版から取り `pdfunite` で1冊にする（公式サイトは同じURLを毎年差し替えてきた）
+- 取得できた年度: 2020・2021・2023・2024・2025。2022年度の3表はどの版にも残っていない。画面では欠けとして扱い、経年の線をそこで切る
+- 2020年度は貸借対照表が残っていないので、2021年度の前年度末列から読む
+- 計算書類は法人全体。嵯峨美術短期大学を含む
+- 太字の科目・合計行と表題が文字でなく図形で描かれ、テキスト層に無い。`scripts/ocr_pdf.swift`（macOS の Vision）で、テキスト層の語はそのまま使い、無い部分だけをOCRで補った `fyYYYY.txt` を作る。抽出は `.txt` があればそちらを読む
+- OCRが太字行を読み違えた3か所（2023年度の人件費・流動資産、2024年度の繰越収支差額の符号）は、`extract_tamabi.py` の `ocr_fixes` で直す。正しい値は内訳行の合計で確かめた
+- 照合: 抽出した全年度・全項目を、同法人の事業報告書（R6年度版・R7年度版）の経年表（千円）と突き合わせ、千円未満の差に収まることを確かめた。2025年度の施設整備等活動・その他の活動の資金収支差額だけは事業報告書と2,000万円ずつ逆にずれるが、計算書類のテキスト層の値（施設整備等 △287,196,427円、その他 8,378,646円）を正とする
+
+```
+python3 scripts/collect_pdfs.py saga
+for y in 2020 2021 2023 2024 2025; do swift scripts/ocr_pdf.swift data/raw/saga/fy$y.pdf > data/raw/saga/fy$y.txt; done
+python3 scripts/extract_tamabi.py data/raw/saga public/data/saga.json saga
+```
+
+## 京都美術工芸大学（学校法人二本松学院）
+
+- 公開: https://www.kyobi.ac.jp/nihonmatsu/ （2015–2025年度の「財務情報」PDF）
+- 画面には入れない。計算書類は法人全体で、専門学校2校（京都建築大学校・京都伝統工芸大学校）を含み、2025年度の教育活動収入のうち大学は約45%にとどまる
+
 ## 成安造形大学（学校法人京都成安学園）
 
 - 公開: https://www.seian.ac.jp/about/public_info/
