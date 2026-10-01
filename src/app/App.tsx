@@ -15,9 +15,13 @@ import {
 } from "../lib/permalink.ts";
 import { structureMetricById } from "../lib/structure.ts";
 import {
+  REGION_FILTER,
+  REGIONS,
   UNIVERSITIES,
+  inRegion,
   universityById,
   type FinanceYear,
+  type Region,
   type UniversityFinance,
 } from "../lib/types.ts";
 import { ViewNav } from "./ViewNav.tsx";
@@ -28,22 +32,30 @@ import { IncomeView } from "./views/IncomeView.tsx";
 import { StructureView } from "./views/StructureView.tsx";
 import { TrendView } from "./views/TrendView.tsx";
 
-function applyPermalink(id: string, year: number, view: ViewId): void {
-  const next = formatPermalink(id, year, view);
+function applyPermalink(id: string, year: number, view: ViewId, region: Region | null): void {
+  const next = formatPermalink(id, year, view, region);
   if (window.location.search === next) return;
-  window.history.replaceState({ id, year, view }, "", `${window.location.pathname}${next}`);
+  window.history.replaceState({ id, year, view, region }, "", `${window.location.pathname}${next}`);
 }
 
-function applyComparePermalink(year: number, metric: string): void {
-  const next = formatComparePermalink(year, metric);
+function applyComparePermalink(year: number, metric: string, region: Region | null): void {
+  const next = formatComparePermalink(year, metric, region);
   if (window.location.search === next) return;
-  window.history.replaceState({ mode: "compare", year, metric }, "", `${window.location.pathname}${next}`);
+  window.history.replaceState(
+    { mode: "compare", year, metric, region },
+    "",
+    `${window.location.pathname}${next}`,
+  );
 }
 
-function applyStructurePermalink(year: number, metric: string): void {
-  const next = formatStructurePermalink(year, metric);
+function applyStructurePermalink(year: number, metric: string, region: Region | null): void {
+  const next = formatStructurePermalink(year, metric, region);
   if (window.location.search === next) return;
-  window.history.replaceState({ mode: "structure", year, metric }, "", `${window.location.pathname}${next}`);
+  window.history.replaceState(
+    { mode: "structure", year, metric, region },
+    "",
+    `${window.location.pathname}${next}`,
+  );
 }
 
 function pageTitle(name: string, year: number, view: ViewId): string {
@@ -71,6 +83,9 @@ export function App() {
   const [year, setYear] = useState<number | null>(boot.year);
   const [view, setView] = useState<ViewId>(boot.view);
   const [metricId, setMetricId] = useState(boot.metric);
+  const [region, setRegion] = useState<Region | null>(
+    boot.mode === "view" && school != null && !inRegion(school.id, boot.region) ? null : boot.region,
+  );
   const yearRef = useRef<number | null>(boot.year);
   const viewYear = useRef<number | null>(boot.year);
   const metric = metricById(metricId);
@@ -115,7 +130,12 @@ export function App() {
       .then((schools) => {
         if (cancelled) return;
         setCompared(schools);
-        setYear(snapYear(unionYears(schools), yearRef.current ?? DEFAULT_YEAR));
+        setYear(
+          snapYear(
+            unionYears(schools.filter((item) => inRegion(item.id, region))),
+            yearRef.current ?? DEFAULT_YEAR,
+          ),
+        );
       })
       .catch((err: unknown) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "読み込みに失敗しました");
@@ -128,22 +148,22 @@ export function App() {
   useEffect(() => {
     if (year == null) return;
     if (mode === "compare") {
-      applyComparePermalink(year, metric.id);
+      applyComparePermalink(year, metric.id, region);
       document.title = `私立の美術芸術大学を比べる ${year}年度の${metric.name}`;
       trackPage();
       return;
     }
     if (mode === "structure") {
-      applyStructurePermalink(year, structureMetric.id);
+      applyStructurePermalink(year, structureMetric.id, region);
       document.title = `経営構造を見る ${year}年度の${structureMetric.name}`;
       trackPage();
       return;
     }
     if (data == null) return;
-    applyPermalink(data.id, year, view);
+    applyPermalink(data.id, year, view, region);
     document.title = pageTitle(data.name, year, view);
     trackPage();
-  }, [mode, year, view, data, metric, structureMetric]);
+  }, [mode, year, view, data, metric, structureMetric, region]);
 
   if (mode === "view" && error && data == null) {
     return (
@@ -153,13 +173,27 @@ export function App() {
     );
   }
 
-  const compareYears = compared == null ? [] : unionYears(compared);
+  const shown = compared?.filter((item) => inRegion(item.id, region)) ?? null;
+  const compareYears = shown == null ? [] : unionYears(shown);
   const roster = mode === "compare" || mode === "structure";
   const years = roster ? compareYears : (data?.years.map((row) => row.year) ?? []);
   const row: FinanceYear | null = data?.years.find((item) => item.year === year) ?? null;
   const first = years[0];
   const last = years[years.length - 1];
-  const rosterReady = roster && compared != null && year != null;
+  const rosterReady = roster && shown != null && year != null;
+  const linkYear = year ?? boot.year ?? DEFAULT_YEAR;
+
+  function chooseRegion(next: Region | null): void {
+    setRegion(next);
+    if (mode === "view") {
+      if (data == null || inRegion(data.id, next)) return;
+      const target = UNIVERSITIES.find((item) => inRegion(item.id, next));
+      if (target != null) window.location.assign(formatPermalink(target.id, linkYear, view, next));
+      return;
+    }
+    if (compared == null || year == null) return;
+    setYear(snapYear(unionYears(compared.filter((item) => inRegion(item.id, next))), year));
+  }
 
   return (
     <div className="page">
@@ -197,12 +231,26 @@ export function App() {
             経営構造
           </button>
         </nav>
+        {REGION_FILTER ? (
+          <div className="region-nav" role="group" aria-label="地域">
+            {[{ id: null, name: "すべて" }, ...REGIONS].map((item) => (
+              <button
+                key={item.id ?? "all"}
+                type="button"
+                aria-pressed={region === item.id}
+                onClick={() => chooseRegion(item.id)}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        ) : null}
         {mode === "view" ? (
           <nav className="school-nav" aria-label="学校">
-            {UNIVERSITIES.map((item) => (
+            {UNIVERSITIES.filter((item) => inRegion(item.id, region)).map((item) => (
               <a
                 key={item.id}
-                href={formatPermalink(item.id, year ?? boot.year ?? DEFAULT_YEAR, view)}
+                href={formatPermalink(item.id, linkYear, view, region)}
                 aria-current={data?.id === item.id ? "page" : undefined}
               >
                 {item.name}
@@ -235,11 +283,11 @@ export function App() {
       </p>
       {error && roster ? <p className="status">{error}</p> : null}
       {roster ? (
-        rosterReady && compared != null && year != null ? (
+        rosterReady && shown != null && year != null ? (
           <>
             {mode === "structure" ? (
               <StructureView
-                schools={compared}
+                schools={shown}
                 years={compareYears}
                 year={year}
                 metricId={structureMetric.id}
@@ -248,7 +296,7 @@ export function App() {
               />
             ) : (
               <CompareView
-                schools={compared}
+                schools={shown}
                 years={compareYears}
                 year={year}
                 metric={metric}
@@ -257,7 +305,7 @@ export function App() {
               />
             )}
             <footer className="source">
-              <Sources schools={compared} />
+              <Sources schools={shown} />
               {mode === "structure"
                 ? "。教育活動収支差額比率、学生納付金依存度、人件費比率、運用収益依存度、純資産比率はパーセント（小数1桁）。手元流動性はか月。収入のその他は手数料を含む。2014年度以前の消費収支計算書は含まない。"
                 : "。比率はパーセント（小数1桁）、運用資産余裕比率は年。2014年度以前の消費収支計算書は含まない。"}

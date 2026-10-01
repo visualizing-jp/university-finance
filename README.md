@@ -9,7 +9,7 @@
 - 大学比較: 経常収入などを分母にした比率を、1指標ずつ横棒と折れ線で並べる
 - 経営構造: 純資産比率と教育活動収支差額比率の散布図、収入・支出の積み上げ、6指標のドット、選んだ指標の推移
 
-画面に出すのは多摩美術大学、武蔵野美術大学、東京造形大学、女子美術大学。日本大学のJSONは法人全体のため描画対象に入れていない。出典は [`docs/sources.md`](docs/sources.md)。
+画面に出すのは関東の多摩美術大学、武蔵野美術大学、東京造形大学、女子美術大学と、関西の京都精華大学、成安造形大学。画面上部で関東・関西に絞れる。日本大学のJSONは法人全体のため描画対象に入れていない。出典は [`docs/sources.md`](docs/sources.md)。
 
 ## 開発
 
@@ -30,8 +30,11 @@ npm run dev
 /?id=musabi&year=2025
 /?id=zokei&year=2025
 /?id=joshibi&year=2025
+/?id=seika&year=2025
+/?id=seian&year=2025
+/?mode=compare&region=kansai&year=2025
 ```
 
-比較の既定指標 `educationRatio` と、個別大学の既定 `view=income` は URL から省く。
+比較の既定指標 `educationRatio` と、個別大学の既定 `view=income`、地域「すべて」は URL から省く。
 
 数値の正本は公式の会計報告PDF。科目の畳み方は [`docs/accounts.md`](docs/accounts.md)。PDF は `data/raw/<id>/fyYYYY.pdf`。抽出は `python3 scripts/extract_tamabi.py <pdf dir> <output json> <id>`。多摩美術大学の令和6年度はフォントが抜けるため、同じディレクトリの `fy2024.txt` を読む。

@@ -73,14 +73,36 @@ export interface UniversityFinance {
   years: FinanceYear[];
 }
 
-export const UNIVERSITIES = [
-  { id: "tamabi", file: "tamabi.json", name: "多摩美術大学" },
-  { id: "musabi", file: "musabi.json", name: "武蔵野美術大学" },
-  { id: "zokei", file: "zokei.json", name: "東京造形大学" },
-  { id: "joshibi", file: "joshibi.json", name: "女子美術大学" },
+export const REGIONS = [
+  { id: "kanto", name: "関東" },
+  { id: "kansai", name: "関西" },
 ] as const;
 
-export type UniversityId = (typeof UNIVERSITIES)[number]["id"];
+export type Region = (typeof REGIONS)[number]["id"];
+
+export const UNIVERSITIES: ReadonlyArray<{
+  id: string;
+  file: string;
+  name: string;
+  region: Region;
+}> = [
+  { id: "tamabi", file: "tamabi.json", name: "多摩美術大学", region: "kanto" },
+  { id: "musabi", file: "musabi.json", name: "武蔵野美術大学", region: "kanto" },
+  { id: "zokei", file: "zokei.json", name: "東京造形大学", region: "kanto" },
+  { id: "joshibi", file: "joshibi.json", name: "女子美術大学", region: "kanto" },
+  { id: "seika", file: "seika.json", name: "京都精華大学", region: "kansai" },
+  { id: "seian", file: "seian.json", name: "成安造形大学", region: "kansai" },
+];
+
+/** どの地域にも大学があるときだけ、地域で絞るスイッチを出す。 */
+export const REGION_FILTER = REGIONS.every((region) =>
+  UNIVERSITIES.some((school) => school.region === region.id),
+);
+
+export function inRegion(id: string, region: Region | null): boolean {
+  if (region == null) return true;
+  return universityById(id)?.region === region;
+}
 
 export function universityById(id: string | null): (typeof UNIVERSITIES)[number] | null {
   if (id == null) return null;

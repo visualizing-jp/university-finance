@@ -17,9 +17,9 @@ interface CompareViewProps {
 }
 
 export function CompareView({ schools, years, year, metric, onYear, onMetric }: CompareViewProps) {
-  const rows = schools.map((school, index) => ({
+  const rows = schools.map((school) => ({
     school,
-    color: schoolColor(index),
+    color: schoolColor(school.id),
     row: school.years.find((item) => item.year === year) ?? null,
   }));
 
@@ -118,9 +118,9 @@ function CompareLines({
   const width = ready ? size.width : 640;
   const height = 280;
   const pad = { top: 16, right: 16, bottom: 28, left: 64 };
-  const series = schools.map((school, index) => ({
+  const series = schools.map((school) => ({
     school,
-    color: schoolColor(index),
+    color: schoolColor(school.id),
     points: years.map((itemYear) => {
       const row = school.years.find((item) => item.year === itemYear);
       return { year: itemYear, value: row == null ? null : metric.value(row) };

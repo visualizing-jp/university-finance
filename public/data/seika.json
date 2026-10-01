@@ -1,0 +1,124 @@
+{
+  "id": "seika",
+  "name": "京都精華大学",
+  "corporation": "学校法人京都精華大学",
+  "unit": "円",
+  "source": "学校法人京都精華大学 計算書類（2024年度の貸借対照表は2025年度計算書類の前年度末）",
+  "sourceUrl": "https://www.kyoto-seika.ac.jp/about/houjin/",
+  "years": [
+    {
+      "year": 2024,
+      "income": {
+        "tuition": 5921337500,
+        "subsidies": 774247719,
+        "donations": 20537076,
+        "auxiliary": 517044300,
+        "interest": 91556130,
+        "other": 266093035
+      },
+      "expense": {
+        "personnel": 3591747725,
+        "education": 2502619834,
+        "admin": 890476814,
+        "other": 33509967
+      },
+      "activityIncome": 7590815760,
+      "activityExpense": 7018354340,
+      "balanceBeforeReserve": 572461420,
+      "educationIncome": 7484690250,
+      "nonEducationIncome": 91556130,
+      "educationExpense": 6984844373,
+      "nonEducationExpense": 16410497,
+      "ordinaryIncome": 7576246380,
+      "ordinaryExpense": 7001254870,
+      "ordinaryBalance": 574991510,
+      "ordinarySubsidy": 774247719,
+      "ordinaryDonation": 20537076,
+      "externalLiabilities": 2428937312,
+      "externalLiabilityParts": {
+        "loans": 2132097000,
+        "bonds": 0,
+        "unpaid": 296840312,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 26776739431,
+        "current": 5778597648
+      },
+      "liabilities": {
+        "fixed": 3436986297,
+        "current": 1331113856
+      },
+      "netAssets": {
+        "basicFund": 33275176756,
+        "carried": -5487939830
+      },
+      "operatingAssets": 13867978610,
+      "cash": {
+        "education": 1152841432,
+        "facility": -1009658988,
+        "other": -137548304,
+        "opening": 5523756345,
+        "closing": 5529390485
+      },
+      "cashDeposits": 5529390485
+    },
+    {
+      "year": 2025,
+      "income": {
+        "tuition": 5825427200,
+        "subsidies": 1048906864,
+        "donations": 27566852,
+        "auxiliary": 484664179,
+        "interest": 129189484,
+        "other": 277485664
+      },
+      "expense": {
+        "personnel": 3604855900,
+        "education": 2938785451,
+        "admin": 793521144,
+        "other": 283177817
+      },
+      "activityIncome": 7793240243,
+      "activityExpense": 7620340312,
+      "balanceBeforeReserve": 172899931,
+      "educationIncome": 7604602960,
+      "nonEducationIncome": 129189484,
+      "educationExpense": 7337162495,
+      "nonEducationExpense": 13452025,
+      "ordinaryIncome": 7733792444,
+      "ordinaryExpense": 7350614520,
+      "ordinaryBalance": 383177924,
+      "ordinarySubsidy": 1003117054,
+      "ordinaryDonation": 14378990,
+      "externalLiabilities": 2321918747,
+      "externalLiabilityParts": {
+        "loans": 1900639000,
+        "bonds": 0,
+        "unpaid": 421279747,
+        "notes": 0
+      },
+      "assets": {
+        "fixed": 27409029811,
+        "current": 5391130027
+      },
+      "liabilities": {
+        "fixed": 3293945129,
+        "current": 1546077852
+      },
+      "netAssets": {
+        "basicFund": 34228636489,
+        "carried": -6268499632
+      },
+      "operatingAssets": 14025822270,
+      "cash": {
+        "education": 1093668113,
+        "facility": -1368038963,
+        "other": -149501400,
+        "opening": 5529390485,
+        "closing": 5105518235
+      },
+      "cashDeposits": 5105518235
+    }
+  ]
+}

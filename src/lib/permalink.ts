@@ -1,5 +1,6 @@
 import { DEFAULT_METRIC_ID } from "./metrics.ts";
 import { DEFAULT_STRUCTURE_METRIC_ID } from "./structure.ts";
+import { REGION_FILTER, REGIONS, type Region } from "./types.ts";
 
 export const VIEW_IDS = ["income", "balance", "cash", "trend"] as const;
 export type ViewId = (typeof VIEW_IDS)[number];
@@ -20,10 +21,21 @@ export interface PermalinkQuery {
   view: ViewId;
   mode: AppMode;
   metric: string;
+  /** null はすべての地域。 */
+  region: Region | null;
 }
 
 export function parseView(raw: string | null): ViewId {
   return (raw != null ? VIEW_QUERY[raw] : undefined) ?? DEFAULT_VIEW;
+}
+
+function parseRegion(raw: string | null): Region | null {
+  if (!REGION_FILTER) return null;
+  return REGIONS.find((region) => region.id === raw)?.id ?? null;
+}
+
+function setRegion(q: URLSearchParams, region: Region | null): void {
+  if (region != null) q.set("region", region);
 }
 
 export function parsePermalink(search: string): PermalinkQuery {
@@ -54,33 +66,47 @@ export function parsePermalink(search: string): PermalinkQuery {
         : mode === "structure"
           ? DEFAULT_STRUCTURE_METRIC_ID
           : DEFAULT_METRIC_ID,
+    region: parseRegion(q.get("region")),
   };
 }
 
 export function formatStructurePermalink(
   year: number,
   metric: string = DEFAULT_STRUCTURE_METRIC_ID,
+  region: Region | null = null,
 ): string {
   const q = new URLSearchParams();
   q.set("mode", "structure");
   q.set("year", String(year));
   if (metric !== DEFAULT_STRUCTURE_METRIC_ID) q.set("metric", metric);
+  setRegion(q, region);
   return `?${q.toString()}`;
 }
 
-export function formatComparePermalink(year: number, metric: string = DEFAULT_METRIC_ID): string {
+export function formatComparePermalink(
+  year: number,
+  metric: string = DEFAULT_METRIC_ID,
+  region: Region | null = null,
+): string {
   const q = new URLSearchParams();
   q.set("mode", "compare");
   q.set("year", String(year));
   if (metric !== DEFAULT_METRIC_ID) q.set("metric", metric);
+  setRegion(q, region);
   return `?${q.toString()}`;
 }
 
-export function formatPermalink(id: string, year: number, view: ViewId = DEFAULT_VIEW): string {
+export function formatPermalink(
+  id: string,
+  year: number,
+  view: ViewId = DEFAULT_VIEW,
+  region: Region | null = null,
+): string {
   const q = new URLSearchParams();
   q.set("id", id);
   q.set("year", String(year));
   if (view !== DEFAULT_VIEW) q.set("view", view);
+  setRegion(q, region);
   return `?${q.toString()}`;
 }
 

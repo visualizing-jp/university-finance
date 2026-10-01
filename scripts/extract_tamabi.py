@@ -124,7 +124,7 @@ def amounts(line: str) -> list[tuple[int, int]]:
 def clean_label(label: str) -> str:
     label = collapse(label)
     label = re.sub(r"^[0-9]+", "", label)
-    label = label.replace("（", "").replace("）", "").replace("(", "").replace(")", "")
+    label = re.sub(r"[（）()<>＜＞]", "", label)
     return label.rstrip("△▲−－-")
 
 
@@ -148,6 +148,9 @@ def match_name(label: str, names: set[str]) -> str | None:
             if len(prefix) <= 4 and noise and "特別" not in prefix:
                 best = name
             break
+    if best is None:
+        # 字の上下がずれたPDFでは、-layout が科目名の字順を入れ替える（固定産資など）。
+        best = next((name for name in names if sorted(name) == sorted(label)), None)
     if best is None or not label.endswith(best):
         return best
     prefix = label[: len(label) - len(best)]
@@ -205,7 +208,7 @@ def section_for(title: str) -> str | None:
     title = title.replace("(総括表)", "").replace("（総括表）", "")
     if title == "活動区分資金収支計算書" or title == "活動区分資金収支計算書(注記)":
         return "cash"
-    if title == "資金収支計算書":
+    if title == "資金収支計算書" or title.endswith("内訳表"):
         return ""
     if title in SECTION_TITLES:
         return SECTION_TITLES[title]
@@ -220,11 +223,13 @@ def yen_scale(text: str) -> int:
     return 1
 
 
-def rows_from_text(text: str, *, ocr: bool = False) -> dict[str, list[tuple[str, int, bool]]]:
+def rows_from_text(
+    text: str, *, ocr: bool = False, bs_column: int = 0
+) -> dict[str, list[tuple[str, int, bool]]]:
     section: str | None = None
     buckets: dict[str, list[tuple[str, int, bool]]] = {"activity": [], "bs": [], "cash": []}
     names = {"activity": ACTIVITY_NAMES, "bs": BS_NAMES, "cash": CASH_NAMES}
-    columns = {"activity": 1, "bs": 0, "cash": 0}
+    columns = {"activity": 1, "bs": bs_column, "cash": 0}
     scale = yen_scale(text)
     pending_label: str | None = None
     pending_values: list[int] | None = None
@@ -346,10 +351,23 @@ def external_liabilities(rows: list[tuple[str, int, bool]], year: int) -> dict[s
     return {"total": total, **parts}
 
 
-def build_year(year: int, text: str, *, ocr: bool = False, school: str = "tamabi") -> dict:
+def build_year(
+    year: int,
+    text: str,
+    *,
+    ocr: bool = False,
+    school: str = "tamabi",
+    bs_text: str | None = None,
+) -> dict:
+    """bs_text があれば、貸借対照表はその翌年度計算書類の前年度末列から読む。"""
     buckets = rows_from_text(text, ocr=ocr)
     activity = buckets["activity"]
     bs = buckets["bs"]
+    if bs_text is not None:
+        bs = rows_from_text(bs_text, bs_column=1)["bs"]
+        summary = only(buckets["bs"], "資産の部合計", year)
+        if only(bs, "資産の部合計", year) != summary:
+            raise SystemExit(f"{year}: 前年度末列の資産合計が当年度の総括表 {summary} と違う")
     cash = buckets["cash"]
     if year == 2024 and school == "tamabi":
         # 資産の部の本年度末は全文OCRが落とす。金額列の切り出しと、前年度末+増減が
@@ -543,6 +561,22 @@ SCHOOLS = {
         "sourceUrl": "https://www.joshibi.ac.jp/about/report/details",
         "require_all": False,
     },
+    "seika": {
+        "name": "京都精華大学",
+        "corporation": "学校法人京都精華大学",
+        "source": "学校法人京都精華大学 計算書類（2024年度の貸借対照表は2025年度計算書類の前年度末）",
+        "sourceUrl": "https://www.kyoto-seika.ac.jp/about/houjin/",
+        "require_all": False,
+        # 2024年度の貸借対照表は総括表しか公開されておらず、現金預金・借入金・未払金がない。
+        "bs_from_next_year": {2024},
+    },
+    "seian": {
+        "name": "成安造形大学",
+        "corporation": "学校法人京都成安学園",
+        "source": "学校法人京都成安学園 計算書類（成安造形大学および成安幼稚園）",
+        "sourceUrl": "https://www.seian.ac.jp/about/public_info/",
+        "require_all": True,
+    },
     "nichidai": {
         "name": "日本大学",
         "corporation": "学校法人日本大学",
@@ -574,7 +608,10 @@ def main() -> None:
                 raise SystemExit(f"{year}: テキストを読めない")
             continue
         use_ocr = ocr_path.exists() and school_id == "tamabi"
-        years.append(build_year(year, text, ocr=use_ocr, school=school_id))
+        bs_text = None
+        if year in school.get("bs_from_next_year", ()):
+            bs_text = load_year_text(raw, year + 1)
+        years.append(build_year(year, text, ocr=use_ocr, school=school_id, bs_text=bs_text))
     if not years:
         raise SystemExit("年度がない")
     payload = {

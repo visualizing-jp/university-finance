@@ -1,4 +1,4 @@
-import type { FinanceYear } from "./types.ts";
+import { UNIVERSITIES, type FinanceYear } from "./types.ts";
 
 export type MetricUnit = "percent" | "year";
 
@@ -126,9 +126,18 @@ export const METRICS: Metric[] = [
 export const DEFAULT_METRIC_ID = "educationRatio";
 
 /** 多摩美は朱、武蔵野は緑、以降は別色。 */
-const SCHOOL_COLORS = ["#c51b7d", "#4d9221", "#8e0152", "#2166ac", "#2c3338"] as const;
+const SCHOOL_COLORS = [
+  "#c51b7d",
+  "#4d9221",
+  "#8e0152",
+  "#2166ac",
+  "#b35806",
+  "#2c3338",
+] as const;
 
-export function schoolColor(index: number): string {
+/** 地域で絞っても色が入れ替わらないよう、全大学の並びで決める。 */
+export function schoolColor(id: string): string {
+  const index = UNIVERSITIES.findIndex((school) => school.id === id);
   return SCHOOL_COLORS[index] ?? SCHOOL_COLORS[SCHOOL_COLORS.length - 1] ?? "#2c3338";
 }
 

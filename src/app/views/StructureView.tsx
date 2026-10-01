@@ -57,9 +57,9 @@ export function StructureView({ schools, years, year, metricId, onYear, onMetric
   const [encode, setEncode] = useState<"share" | "amount">("share");
   const [activeId, setActiveId] = useState<string | null>(null);
   const trendRef = useRef<HTMLHeadingElement>(null);
-  const entries: SchoolEntry[] = schools.map((school, index) => ({
+  const entries: SchoolEntry[] = schools.map((school) => ({
     school,
-    color: schoolColor(index),
+    color: schoolColor(school.id),
     short: shortName(school.id, school.name),
     row: school.years.find((item) => item.year === year) ?? null,
   }));
@@ -102,7 +102,7 @@ export function StructureView({ schools, years, year, metricId, onYear, onMetric
         <p className="structure-note">
           {encode === "share"
             ? "棒の長さは100%。色は事業活動収入・事業活動支出に占める科目の割合。"
-            : "棒の長さは金額。この4大学で一番大きい大学を幅いっぱいにしている。"}
+            : `棒の長さは金額。この${schools.length}大学で一番大きい大学を幅いっぱいにしている。`}
           {INCOME_NOTE}
         </p>
         <Composition
@@ -733,9 +733,9 @@ function MetricTrend({
   const width = ready ? size.width : 720;
   const height = 280;
   const pad = { top: 16, right: 16, bottom: 28, left: 72 };
-  const series = schools.map((school, index) => ({
+  const series = schools.map((school) => ({
     school,
-    color: schoolColor(index),
+    color: schoolColor(school.id),
     short: shortName(school.id, school.name),
     points: years.map((itemYear) => {
       const row = school.years.find((item) => item.year === itemYear);

@@ -27,6 +27,32 @@ python3 scripts/extract_tamabi.py data/raw/zokei public/data/zokei.json zokei
 python3 scripts/extract_tamabi.py data/raw/joshibi public/data/joshibi.json joshibi
 ```
 
+## 京都精華大学（学校法人京都精華大学）
+
+- 公開: https://www.kyoto-seika.ac.jp/about/houjin/
+- 使うファイル: 2025年度は「計算書類」PDF 1冊。2024年度は貸借対照表・活動区分資金収支計算書・事業活動収支計算書の個別PDFを `pdfunite` で1冊にする
+- 取得できた年度: 2024–2025
+- 2024年度の貸借対照表は総括表だけで、現金預金・借入金・未払金がない。そのため2025年度計算書類の前年度末列から読む。資産合計は2024年度の総括表と一致することを確かめている
+- 2020–2023年度も Internet Archive に同じ様式のPDFが残るが、貸借対照表が総括表だけなので使わない。2016–2019年度のPDFは公式サイトにもアーカイブにも無い
+- 2025年度は改正後の会計基準の様式。PDFの字の位置がずれ、`固定資産` が `固定産資` のように読める行がある。抽出側は、字を並べ替えると科目名になる行をその科目として読む
+
+```
+python3 scripts/collect_pdfs.py seika
+python3 scripts/extract_tamabi.py data/raw/seika public/data/seika.json seika
+```
+
+## 成安造形大学（学校法人京都成安学園）
+
+- 公開: https://www.seian.ac.jp/about/public_info/
+- 使うファイル: 各年度の「計算書類」PDF
+- 取得できた年度: 2015–2025
+- 計算書類は法人全体。成安幼稚園を含む。2024年度の事業活動収支内訳表では、事業活動収入のうち幼稚園は約5%
+
+```
+python3 scripts/collect_pdfs.py seian
+python3 scripts/extract_tamabi.py data/raw/seian public/data/seian.json seian
+```
+
 ## 日本大学芸術学部
 
 芸術学部だけの事業活動収支計算書・貸借対照表は、学部サイトにも法人の情報公開にも無い。公開されているのは学校法人日本大学の決算書（全学部・附属校を含む）。
