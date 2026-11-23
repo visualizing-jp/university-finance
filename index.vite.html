@@ -23,6 +23,16 @@
       gtag("js", new Date());
       gtag("config", "G-1945XFLY45", { send_page_view: false });
     </script>
+    <script>
+      if (location.hostname === 'university-finance.visualizing.jp' && location.pathname === '/') {
+        window.portfolioDataLayer = window.portfolioDataLayer || [];
+        window.portfolioDataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+        const tag = document.createElement('script');
+        tag.async = true;
+        tag.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-55W4KMR6&l=portfolioDataLayer';
+        document.head.appendChild(tag);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
